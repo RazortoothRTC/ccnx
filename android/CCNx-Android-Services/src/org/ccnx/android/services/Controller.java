@@ -199,6 +199,7 @@ public final class Controller extends Activity implements OnClickListener {
     	try {
     		PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
 			mReleaseVersion = TAG + " " + pInfo.versionName;
+			setTitle(getTitle() + "(v" + pInfo.versionName + ")");
 		} catch(NameNotFoundException e) {
 			Log.e(TAG, "Could not find package name.  Reason: " + e.getMessage());
 		}
