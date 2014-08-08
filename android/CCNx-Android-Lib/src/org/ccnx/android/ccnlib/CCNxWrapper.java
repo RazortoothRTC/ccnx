@@ -111,7 +111,10 @@ public abstract class CCNxWrapper {
 	public void bindIfRunning(){
 		Log.d(TAG,"If Running, Bind");
 		if(isRunning()){
+			Log.d(TAG,"Is Running, go ahead and bind");
 			bindService();
+		} else {
+			Log.d(TAG,"Is not running, don't bind");
 		}
 	}
 	

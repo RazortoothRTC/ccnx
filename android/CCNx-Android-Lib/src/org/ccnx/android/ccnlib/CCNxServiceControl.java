@@ -129,6 +129,7 @@ public final class CCNxServiceControl {
 	 * @return true if everything started correctly, false otherwise
 	 */
 	public boolean startAll(){
+		Log.d(TAG, "startAll()");
 		if (checkSystemOK()) {
 			newCCNxAPIStatus(SERVICE_STATUS.START_ALL_INITIALIZING);
 			Log.i(TAG,"startAll waiting for CCND startService");
@@ -167,6 +168,7 @@ public final class CCNxServiceControl {
 	 * has started then you should register a callback before issuing this call.
 	 */
 	public void startAllInBackground(){
+		Log.d(TAG, "startAllInBackground");
 		Runnable r = new Runnable(){
 			public void run() {
 				startAll();
