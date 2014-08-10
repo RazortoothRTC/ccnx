@@ -75,11 +75,15 @@ Aside from setting log levels, the configuration should be read from CCNx itself
 
 Taking a leaf from the Android Logback project, we should offer a way to configure CCNx Android Services using either a Configuration File, directly in the Android Manifest, or even in the code.  This will enable a variety of options for configuration, either by deployment using a manifest file or in a config file.
 
-## Step 8 - Document all changes and new features
+## Step 8 - Implement "enterprise" logging
+
+We should have a way to write out logs, handle log rotation, and log viewer.
+
+## Step 9 - Document all changes and new features
 
 We need some docs describing how to build, configure, deploy, and use the CCNx Android Services.
 
-## Step 9 - Unit Tests, Integration tests, Stress Tests
+## Step 10 - Unit Tests, Integration tests, Stress Tests
 
 There was never any real testing other than a lone system test done before shipping a realse.  We need to divide the tests performed between:
 

@@ -80,17 +80,32 @@ public final class CcndService extends CCNxService {
 		// And while settings OPTIONS, set preferences
 		SharedPreferences.Editor prefsEditor = mCCNxServicePrefs.edit();
         
-        
+		//
+		// Always load from prefs, but allow for override from Intent OPTION or System
+		// Env
+		//
+		options = new HashMap<String, String>((HashMap<String, String>)mCCNxServicePrefs.getAll());
         if (intent != null) {
 			for( CCND_OPTIONS opt : CCND_OPTIONS.values() ) {
+				// XXX I think this breaks any use of prefs
+				/*
 				if(! intent.hasExtra(opt.name())){
 					continue;
 				}
+				*/
+
+				//
+				// If the OPTION isn't in the Intent, Give precedence to
+				// 1. Intent OPTION
+				// 2. System Properties
+				// 3. Preferences
+				//
 				String s = intent.getStringExtra( opt.name() );
-				if( null == s ) 
+				if(s == null) {
 					s = System.getProperty(opt.name());
-					Log.d(TAG,"setting option " + opt.name() + " = " + s);
+				}
 				if( s != null ) {
+					Log.d(TAG,"setting option " + opt.name() + " = " + s);
 					options.put(opt.name(), s);
 					isPrefSet = true;
 					prefsEditor.putString(opt.name(), s);
@@ -98,11 +113,9 @@ public final class CcndService extends CCNxService {
 				
 			}
 			if (isPrefSet) {
+				Log.d(TAG, "Commit prefs changes");
 				prefsEditor.commit();
 			}
-		} else {
-			// We must load options from prefs
-			options = new HashMap<String, String>((HashMap<String, String>)mCCNxServicePrefs.getAll());
 		}
 
 		Load();	

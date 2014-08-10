@@ -53,6 +53,7 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.Spinner;
 import android.net.Uri;
+import android.content.SharedPreferences;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -77,6 +78,7 @@ public final class Controller extends Activity implements OnClickListener {
 	private CCNxServiceControl control;
 	private String mReleaseVersion = "Unknown";
     private BroadcastReceiver mReceiver;
+    private SharedPreferences mCCNxServicePrefs;
 
 	// Create a handler to receive status updates
 	private final Handler _handler = new Handler() {
@@ -193,6 +195,8 @@ public final class Controller extends Activity implements OnClickListener {
 	}
     private void init(){
 		Log.d(TAG, "init()");
+		mCCNxServicePrefs = this.getSharedPreferences("ccnxserviceprefs", MODE_WORLD_READABLE);
+    	
     	control = new CCNxServiceControl(this);
     	control.registerCallback(cb);
     	control.connect();
@@ -312,20 +316,31 @@ public final class Controller extends Activity implements OnClickListener {
         //
         // Grab the LinearLayout in the 0th child element
         //
-        
         ViewGroup layout = (ViewGroup) findViewById(R.id.scrollcontainer); // .getChildAt(0);
         ViewGroup layoutchild = (ViewGroup) layout.getChildAt(0);
         if (Build.VERSION.SDK_INT >= 0x0000000e) { // ICS or greater, requires at least SDK 14 to compile
 			final android.widget.Switch swbtn = new android.widget.Switch(this);
+			Log.d(TAG, "Got CCNS_ENABLE set to: " + mCCNxServicePrefs.getString(CCNS_OPTIONS.CCNS_ENABLE.name(), "1"));
 			swbtn.setOnCheckedChangeListener(new ToggleOptionChangeListener(CCNS_OPTIONS.CCNS_ENABLE));
-			swbtn.setChecked(true);
+			if (mCCNxServicePrefs.getString(CCNS_OPTIONS.CCNS_ENABLE.name(), "1").equals("1")) {
+				swbtn.setChecked(true);
+			} else {
+				swbtn.setChecked(false);
+			}
 			layoutchild.addView(swbtn);
 		} else { // Fall back to pre-ICS widget
 			android.widget.ToggleButton tbtn = new android.widget.ToggleButton(this);
 			tbtn.setOnCheckedChangeListener(new ToggleOptionChangeListener(CCNS_OPTIONS.CCNS_ENABLE));
-			tbtn.setChecked(true);
+			if (mCCNxServicePrefs.getString(CCNS_OPTIONS.CCNS_ENABLE.name(), "1").equals("1")) {
+				tbtn.setChecked(true);
+			} else {
+				tbtn.setChecked(false);
+			}
 			layoutchild.addView(tbtn);
 		}
+
+		final Spinner ccnrDebugSpinner = (Spinner) findViewById(R.id.key_ccnr_debug);  
+		final Spinner ccnsDebugSpinner = (Spinner) findViewById(R.id.key_ccns_debug);
 	}
 
 	private class ToggleOptionChangeListener implements CompoundButton.OnCheckedChangeListener {

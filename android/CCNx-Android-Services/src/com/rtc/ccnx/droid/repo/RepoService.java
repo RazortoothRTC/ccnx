@@ -86,7 +86,7 @@ public final class RepoService extends CCNxService {
 		Log.d(TAG, "onStartService - Starting");
 		boolean isPrefSet = false;
 
-		// Get all the CCND options from the intent 
+		// Get all the REPO options from the intent 
 		// If no option is found on intent, look in System properties
 		// If no system property is set, fallback to preferences
 		// And while settings OPTIONS, set preferences
@@ -142,36 +142,66 @@ public final class RepoService extends CCNxService {
 					repo_namespace = DEFAULT_REPO_NAMESPACE;
 				}	
 			} else if (Pattern.matches("2\\.0\\.0", repo_version)) {
-				for( CCNR_OPTIONS opt : CCNR_OPTIONS.values() ) {
-					if(!intent.hasExtra(opt.name())){
-						continue;
+				//
+				// Always load from prefs, but allow for override from Intent OPTION or System
+				// Env
+				//
+				options = new HashMap<String, String>((HashMap<String, String>)mCCNxServicePrefs.getAll());
+				if (intent != null) {
+					for( CCNR_OPTIONS opt : CCNR_OPTIONS.values() ) {
+						// XXX I think this breaks any use of prefs
+						/*
+						if(!intent.hasExtra(opt.name())){
+							continue;
+						}
+						*/
+						//
+						// If the OPTION isn't in the Intent, Give precedence to
+						// 1. Intent OPTION
+						// 2. System Properties
+						// 3. Preferences
+						//
+						String s = intent.getStringExtra( opt.name() );
+						if(s == null)  {
+							s = System.getProperty(opt.name());
+						}
+						
+						if( s != null ) {
+							Log.d(TAG,"setting option " + opt.name() + " = " + s);
+							options.put(opt.name(), s);
+							isPrefSet = true;
+							prefsEditor.putString(opt.name(), s);
+						}
 					}
-					String s = intent.getStringExtra( opt.name() );
-					if( null == s ) 
-						s = System.getProperty(opt.name());
-						Log.d(TAG,"setting option " + opt.name() + " = " + s);
-					if( s != null ) {
-						options.put(opt.name(), s);
-						isPrefSet = true;
-						prefsEditor.putString(opt.name(), s);
+					for( CCNS_OPTIONS opt : CCNS_OPTIONS.values() ) {
+						// XXX I think this breaks any use of prefs
+						/*
+						if(!intent.hasExtra(opt.name())){
+							continue;
+						}
+						*/
+						//
+						// If the OPTION isn't in the Intent, Give precedence to
+						// 1. Intent OPTION
+						// 2. System Properties
+						// 3. Preferences
+						//
+						String s = intent.getStringExtra( opt.name() );
+						if( null == s ) {
+							s = System.getProperty(opt.name());
+						}
+							
+						if( s != null ) {
+							Log.d(TAG,"setting option " + opt.name() + " = " + s);
+							options.put(opt.name(), s);
+							isPrefSet = true;
+							prefsEditor.putString(opt.name(), s);
+						}
 					}
-				}
-				for( CCNS_OPTIONS opt : CCNS_OPTIONS.values() ) {
-					if(!intent.hasExtra(opt.name())){
-						continue;
+					if (isPrefSet) {
+						Log.d(TAG, "Commit prefs changes");
+						prefsEditor.commit();
 					}
-					String s = intent.getStringExtra( opt.name() );
-					if( null == s ) 
-						s = System.getProperty(opt.name());
-						Log.d(TAG,"setting option " + opt.name() + " = " + s);
-					if( s != null ) {
-						options.put(opt.name(), s);
-						isPrefSet = true;
-						prefsEditor.putString(opt.name(), s);
-					}
-				}
-				if (isPrefSet) {
-					prefsEditor.commit();
 				}
 			} else {
 				Log.d(TAG,"Unknown Repo version " + repo_version + " specified, failed to start Repo.");
