@@ -7,9 +7,14 @@ Author
 ======
 
 David J. Kordsmeier
+Razortooth Communications, LLC
 github: truedat101
 twitter: @dkords
 irc: truedat101
+
+Copyright
+=========
+This document is released under the CC-BY-SA 4.0 License: http://creativecommons.org/licenses/by-sa/4.0/ .  Feel free to share, remix, and distribute.
 
 The Problem
 ===========

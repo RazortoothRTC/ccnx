@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<string name="app_name">CCNx Service Control</string>
+	<string name="app_name">CCNxTxRxRelay</string>
 	<string name="allStartButton">Start All</string>
 	<string name="allStartButton_Processing">Processing Request</string>
 	<string name="allStartButton_Error">Error Starting Up.  Reset to clear Error.</string>
@@ -31,7 +31,11 @@
     <string name="label_ok">OK</string>
     <string name="label_ccndstatus">CCND Status</string>
     <string name="service_started1_msg">CCNx Service Control started</string>
-    <string name="about_text">CCNx 0.7.2\n/*
+    <string name="about_text">CCNx 0.7.2\n
+/*
+  Portions Copyright (C) 2014 Razortooth Communications, LLC \n
+*/\n
+/*
  *
  * CCNx Android Services\m
  *\m
@@ -47,5 +51,7 @@
  * License along with this program; if not, write to the\n
  * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,\n
  * Boston, MA 02110-1301, USA.\n
- */</string>
+ */
+ 
+</string>
 </resources>
