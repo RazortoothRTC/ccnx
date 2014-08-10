@@ -24,7 +24,7 @@ import java.util.HashMap;
 
 import org.ccnx.android.ccnlib.CCNxServiceStatus.SERVICE_STATUS;
 import org.ccnx.android.ccnlib.CcndWrapper.CCND_OPTIONS;
-import org.ccnx.android.services.CCNxService;
+import com.rtc.ccnx.droid.CCNxService;
 import org.ccnx.ccn.impl.security.keys.BasicKeyManager;
 import org.ccnx.android.ccnlib.CCNxLibraryCheck;
 
@@ -44,7 +44,7 @@ import android.util.Log;
  * nothing using the unix domain socket on Android. 
  */
 public final class CcndService extends CCNxService {
-	public static final String CLASS_TAG = "CCNxCCNdService";
+	public static final String CLASS_TAG = "CCNx CCNdService";
 	
 	private String KEYSTORE_NAME = ".ccnd_keystore_";
 	private final static char [] KEYSTORE_PASS = "\010\043\103\375\327\237\152\351\155".toCharArray();
@@ -101,11 +101,19 @@ public final class CcndService extends CCNxService {
 				// 3. Preferences
 				//
 				String s = intent.getStringExtra( opt.name() );
-				if(s == null) {
+				if (s == null) {
+					Log.d(TAG, "attempting to set option from System props");
 					s = System.getProperty(opt.name());
+					if (s == null) {
+						Log.d(TAG, "attempting to set option from preferences");
+						s = options.get(opt.name());
+					}
+				} else {
+					Log.d(TAG, "Use option from Intent");
 				}
-				if( s != null ) {
-					Log.d(TAG,"setting option " + opt.name() + " = " + s);
+
+				if ( s != null ) {
+					Log.d(TAG,"setting option as pref " + opt.name() + " = " + s);
 					options.put(opt.name(), s);
 					isPrefSet = true;
 					prefsEditor.putString(opt.name(), s);
