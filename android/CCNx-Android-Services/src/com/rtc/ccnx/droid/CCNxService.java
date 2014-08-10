@@ -15,7 +15,7 @@
  * Boston, MA 02110-1301, USA.
  */
 
-package org.ccnx.android.services;
+package com.rtc.ccnx.droid;
 
 import java.util.HashMap;
 

@@ -15,7 +15,7 @@
  * Boston, MA 02110-1301, USA.
  */
 
-package org.ccnx.android.services.ccnd;
+package com.rtc.ccnx.droid.ccnd;
 
 import java.io.File;
 import java.io.FileOutputStream;

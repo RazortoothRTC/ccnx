@@ -15,7 +15,7 @@
  * Boston, MA 02110-1301, USA.
  */
 
-package org.ccnx.android.services.repo;
+package com.rtc.ccnx.droid.repo;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
