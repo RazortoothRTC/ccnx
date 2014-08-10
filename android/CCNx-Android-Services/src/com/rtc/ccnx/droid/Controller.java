@@ -24,6 +24,7 @@ import org.ccnx.android.ccnlib.CcndWrapper.CCND_OPTIONS;
 import org.ccnx.android.ccnlib.RepoWrapper.CCNR_OPTIONS;
 import org.ccnx.android.ccnlib.RepoWrapper.REPO_OPTIONS;
 import org.ccnx.android.ccnlib.RepoWrapper.CCNS_OPTIONS;
+import com.rtc.ccnx.droid.repo.RepoService;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -286,7 +287,7 @@ public final class Controller extends Activity implements OnClickListener {
 			// Not all running... attempt to start them
 			// but first, get the user settings
 			// Consider these to be our defaults
-			// We don't really check validity of the data in terms of constraints
+			// We don't really check validity of the data in terms of input constraints
 			// so we should shore this up to be more robust
 			final EditText ccnrDir = (EditText) findViewById(R.id.key_ccnr_directory);  
 			String val = ccnrDir.getText().toString();  
@@ -374,6 +375,17 @@ public final class Controller extends Activity implements OnClickListener {
 		final Spinner ccnsDebugSpinner = (Spinner) findViewById(R.id.key_ccns_debug);
 		if (!mCCNxServicePrefs.getString(CCNS_OPTIONS.CCNS_DEBUG.name(), "WARNING").equals("WARNING")) {
 			ccnsDebugSpinner.setSelection(DEBUG_MAP.get(mCCNxServicePrefs.getString(CCNS_OPTIONS.CCNS_DEBUG.name(), "WARNING")));
+		}
+
+		final EditText ccnrDir = (EditText) findViewById(R.id.key_ccnr_directory);  
+		String etdefault = mCCNxServicePrefs.getString(CCNR_OPTIONS.CCNR_DIRECTORY.name(), RepoService.DEFAULT_REPO_DIR);
+		if (etdefault.length() > 0) {
+			ccnrDir.setText(etdefault);
+		}
+		final EditText ccnrGlobalPrefix= (EditText) findViewById(R.id.key_ccnr_global_prefix);  
+		etdefault = mCCNxServicePrefs.getString(CCNR_OPTIONS.CCNR_GLOBAL_PREFIX.name(), RepoService.DEFAULT_REPO_GLOBAL_NAME);
+		if (etdefault.length() > 0) {
+			ccnrGlobalPrefix.setText(etdefault);
 		}
 	}
 
