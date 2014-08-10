@@ -59,7 +59,9 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
-
+import java.util.Collections;
+import java.util.Map;
+import java.util.HashMap;
 /**
  * Android UI for controlling CCNx services.
  */
@@ -79,6 +81,32 @@ public final class Controller extends Activity implements OnClickListener {
 	private String mReleaseVersion = "Unknown";
     private BroadcastReceiver mReceiver;
     private SharedPreferences mCCNxServicePrefs;
+
+    // Attribution for this approach to pre-initializing a map
+    // http://stackoverflow.com/a/509016/796514
+    // Thank you SO
+    private static final Map<String, Integer> DEBUG_MAP = createDebugMap();
+    private static Map<String, Integer> createDebugMap() {
+        Map<String, Integer> result = new HashMap<String, Integer>();
+        result.put("WARNING", 0);
+        result.put("SEVERE", 1);
+        result.put("ERROR", 2);
+        result.put("FINE", 3);
+        result.put("FINER", 4);
+        result.put("FINEST", 5);
+        result.put("NONE", 6);
+        return Collections.unmodifiableMap(result);
+        // From arrays.xml , update the above map if we change the ordering
+        /*
+        <item>@string/debug_warning</item>
+		<item>@string/debug_severe</item>
+		<item>@string/debug_error</item>
+		<item>@string/debug_fine</item>
+		<item>@string/debug_finer</item>
+		<item>@string/debug_finest</item>
+		<item>@string/debug_none</item>
+		*/
+    }
 
 	// Create a handler to receive status updates
 	private final Handler _handler = new Handler() {
@@ -340,7 +368,13 @@ public final class Controller extends Activity implements OnClickListener {
 		}
 
 		final Spinner ccnrDebugSpinner = (Spinner) findViewById(R.id.key_ccnr_debug);  
+		if (!mCCNxServicePrefs.getString(CCNR_OPTIONS.CCNR_DEBUG.name(), "WARNING").equals("WARNING")) {
+			ccnrDebugSpinner.setSelection(DEBUG_MAP.get(mCCNxServicePrefs.getString(CCNR_OPTIONS.CCNR_DEBUG.name(), "WARNING")));
+		}
 		final Spinner ccnsDebugSpinner = (Spinner) findViewById(R.id.key_ccns_debug);
+		if (!mCCNxServicePrefs.getString(CCNS_OPTIONS.CCNS_DEBUG.name(), "WARNING").equals("WARNING")) {
+			ccnsDebugSpinner.setSelection(DEBUG_MAP.get(mCCNxServicePrefs.getString(CCNS_OPTIONS.CCNS_DEBUG.name(), "WARNING")));
+		}
 	}
 
 	private class ToggleOptionChangeListener implements CompoundButton.OnCheckedChangeListener {

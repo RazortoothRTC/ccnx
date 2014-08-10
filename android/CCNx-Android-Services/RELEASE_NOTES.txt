@@ -5,3 +5,5 @@
 * 63f57bd refs #6 Fix for Orientation Change crashes, lock into portrait mode
 * 2c4285b refs #1 Write up Technical Note 1 to help explain the basis for the work
 * refs #9 Add RELEASE_NOTES.txt to track all changes 
+* refs #13 Refactor package name used for Android Services as we move to CCNxTxRxRelay branding, add new icon
+* refs #14 Add persistent configuration that survives between runs
