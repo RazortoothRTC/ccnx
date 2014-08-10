@@ -1,0 +1,7 @@
+0.7.2
+=====
+* Reset versioning (was fixed on 1.0.0 for years) to match the associated CCNx release
+* 80e5200 refs #7 Add version string to app title
+* 63f57bd refs #6 Fix for Orientation Change crashes, lock into portrait mode
+* 2c4285b refs #1 Write up Technical Note 1 to help explain the basis for the work
+* refs #9 Add RELEASE_NOTES.txt to track all changes 
