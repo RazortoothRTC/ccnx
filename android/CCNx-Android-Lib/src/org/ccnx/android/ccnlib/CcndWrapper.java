@@ -36,6 +36,8 @@ public final class CcndWrapper extends CCNxWrapper {
 		CCND_CAP,
 		CCND_DATA_PAUSE_MICROSEC,
 		CCND_TRYFIB,
+		CCND_AUTOREG,
+		CCND_DEFAULT_FORWARDING_ENTRIES,
 		CCN_LOCAL_PORT
 	}
 	
