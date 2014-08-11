@@ -22,10 +22,13 @@ import org.ccnx.android.ccnlib.CcndWrapper.CCND_OPTIONS;
 import org.ccnx.android.ccnlib.RepoWrapper.REPO_OPTIONS;
 import org.ccnx.android.ccnlib.RepoWrapper.CCNS_OPTIONS;
 import org.ccnx.android.ccnlib.RepoWrapper.CCNR_OPTIONS;
+import org.ccnx.ccn.utils.ccndcontrol;
+import org.ccnx.ccn.config.UserConfiguration;
 
 import android.content.Context;
 import android.util.Log;
 import android.os.Environment;
+import android.os.AsyncTask;
 
 import java.io.File;
 
@@ -142,6 +145,9 @@ public final class CCNxServiceControl {
 				newCCNxAPIStatus(SERVICE_STATUS.START_ALL_ERROR);
 				return false;
 			}
+			// Go ahead and set default forwarding
+			new AsyncDefaultForwardingConfigTask().execute();
+
 			Log.i(TAG,"startAll waiting for REPO startService");
 			repoInterface.startService();
 			Log.i(TAG,"startAll waiting for REPO waitForReady");
@@ -311,4 +317,73 @@ public final class CCNxServiceControl {
 	public SERVICE_STATUS getRepoStatus(){
 		return repoStatus;
 	}
+
+	private class AsyncDefaultForwardingConfigTask extends AsyncTask<Void,Void,Void>{
+	    @Override
+	    protected Void doInBackground(Void... unused) {
+	      Log.d(TAG, "configure default routes");
+	      configureDefaultRoutes();
+	        
+	      return(null);
+	    }
+
+	    @Override
+	    protected void onProgressUpdate(Void... unused) {
+	      // setProgressPercent(0);
+	    }
+	    
+	    @Override
+	    protected void onPreExecute() {
+	    }
+
+	    @Override
+	    protected void onPostExecute(Void unused) {
+	    }
+	}
+
+	public int configureDefaultRoutes() {
+    	int status = 0;
+    	//
+        // Let's try to create the routes if there are any set
+        //
+        final String defaultForwardingEntriesProp = ccndInterface.getOption(CCND_OPTIONS.CCND_DEFAULT_FORWARDING_ENTRIES.name());
+        String defaultForwardingEntryStrings[] = defaultForwardingEntriesProp.split(",");
+        // String keystoredir = ccndInterface.getOption(CCND_OPTIONS.CCND_KEYSTORE_DIRECTORY.name());
+        // String keystorename = 
+
+        //
+        // Calls to ccndcontrol get an exception java.lang.NullPointerException: Attempt to invoke virtual method 'byte[] org.ccnx.ccn.protocol.PublisherPublicKeyDigest.digest()' on a null object reference
+        //
+        UserConfiguration.setUserConfigurationDirectory("/mnt/sdcard/ccnx"); // XXX Hardcoded value
+        UserConfiguration.setUserName("user"); // XXX Hardcoded value
+        if (defaultForwardingEntryStrings.length > 0) {
+        	//
+        	// Check each route, split into string parts
+        	//
+        	for (int i = 0; i < defaultForwardingEntryStrings.length; i++) {
+        		final String[] forwardingcmd = defaultForwardingEntryStrings[i].split(" ");
+        		Log.d(TAG, "Splitting cmd: " + defaultForwardingEntryStrings[i] + " and attempt to configure route");
+	            try {
+	            	//
+	            	// Set a route for each DEFAULT_FORWARDING_ENTRIES item
+	            	//
+	            	for (int j = 0; j < forwardingcmd.length; j++) {
+	            		Log.d(TAG, "CMD[" + j + "] = " + forwardingcmd[j]);
+	            	}
+	                if (ccndcontrol.executeCommand(forwardingcmd) < 0) {
+	                    Log.e(TAG, "configureDefaultRoutes() Unable to forwarding for command: " + defaultForwardingEntryStrings[0]);
+	                } else {
+	                	Log.d(TAG, "configureDefaultRoutes() success routing: " + defaultForwardingEntryStrings[0]);
+	                	status--;
+	                }
+	            } catch(Exception ce) { // XXX Should catch the actual exception
+	                ce.printStackTrace();
+	                Log.e(TAG, "Unable to configure forwarding command, reason: " + ce.getMessage());
+	            }
+        	}
+        } else {
+        	Log.d(TAG, "configureDefaultRoutes() routes are configured, nothing to do");
+        }
+        return status;
+    }
 }

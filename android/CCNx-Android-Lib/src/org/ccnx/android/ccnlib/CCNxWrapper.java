@@ -252,6 +252,10 @@ public abstract class CCNxWrapper {
 	public void setOption(String key, String value) {
 		options.setProperty(key, value);
 	}
+
+	public String getOption(String key) {
+		return options.getProperty(key);
+	}
 	
 	public void clearOptions() {
 		options.clear();
