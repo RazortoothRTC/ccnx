@@ -329,9 +329,15 @@ public final class Controller extends Activity implements OnClickListener {
 				Toast.makeText(this, "CCNS_DEBUG field is not valid.  Please set and then start.", 10).show();
 				return;
 			}
+
+			final EditText defaultForwardingEntriesET = (EditText) findViewById(R.id.key_default_forwarding_entries);  
+			val = defaultForwardingEntriesET.getText().toString();  
+			if (isValid(val)) {
+				// Set the value into the environment
+				control.setCcndOption(CCND_OPTIONS.CCND_DEFAULT_FORWARDING_ENTRIES, val);
+			}
 			control.startAllInBackground();
 		}
-		// updateState();
 	}
 
 	private void initUI() {
