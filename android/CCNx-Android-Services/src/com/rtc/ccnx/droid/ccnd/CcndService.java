@@ -203,6 +203,9 @@ public final class CcndService extends CCNxService {
 			FileOutputStream stream = new FileOutputStream(try_keystore);
 			BasicKeyManager.createKeyStore(stream, null, "ccnd", KEYSTORE_PASS, "CCND");
 			stream.close();
+			stream = new FileOutputStream(new File(dir, ".ccnd_keystore"));
+			BasicKeyManager.createKeyStore(stream, null, "ccndadmin", "Ccndadm1n#".toCharArray(), "ccndadmin"); // XXX Put this password and username into prefs/options
+			stream.close();
 		} catch(RuntimeException rte) {
 			// There are a few which can fail and this makes the service unstable since
 			// subsequent service invocations will find the keystore, partially baked, return, and later crash, 

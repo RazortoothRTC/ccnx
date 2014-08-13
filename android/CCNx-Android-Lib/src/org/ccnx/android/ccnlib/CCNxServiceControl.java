@@ -362,28 +362,10 @@ public final class CCNxServiceControl {
 		}
 		String keystore_name = ".ccnd_keystore_";
 
-		// ccnd_keydir, KEYSTORE_NAME + ccnd_port
-		// File dir = new File(dir_name);
-
-		// File try_keystore = new File(ccnd_keydir, keystore_name);
-		// FileOutputStream stream = new FileOutputStream(try_keystore);
-		/* public BasicKeyManager(String userName, String keyStoreDirectory,
-						   String configurationFileName,
-						   String keyStoreFileName, String keyStoreType, 
-						   String defaultAlias, char [] password) throws ConfigurationException, IOException {
-		*/
 		BasicKeyManager keyManager = new BasicKeyManager("CCND", ccnd_keydir, null, keystore_name + ccnd_port, null, "ccnd", KEYSTORE_PASS);
-		// BasicKeyManager keyManager = new BasicKeyManager("user", "/mnt/sdcard/ccnx", null, null, null, null, "changeme".toCharArray()); // "Th1s1sn0t8g00dp8ssw0rd."
-		
 		Log.d(TAG, "ccnd_keydir = " + ccnd_keydir);
 		Log.d(TAG, "keystore_name = " + keystore_name + ccnd_port);
-
-		UserConfiguration.setUserConfigurationDirectory(ccnd_keydir); // XXX Hardcoded value
-        UserConfiguration.setUserName("CCND"); // XXX Hardcoded value
-        UserConfiguration.setKeystoreFileName(keystore_name + ccnd_port);
-        UserConfiguration.setKeystorePassword("\010\043\103\375\327\237\152\351\155");
 		Log.d(TAG, "loadCCNDKeyManager() succesfully called");
-		// stream.close();
 		return keyManager;
 	}
 
@@ -400,45 +382,39 @@ public final class CCNxServiceControl {
         //
         // Calls to ccndcontrol get an exception java.lang.NullPointerException: Attempt to invoke virtual method 'byte[] org.ccnx.ccn.protocol.PublisherPublicKeyDigest.digest()' on a null object reference
         //
-        // UserConfiguration.setUserConfigurationDirectory("/mnt/sdcard/ccnx"); // XXX Hardcoded value
-        // UserConfiguration.setUserName("user"); // XXX Hardcoded value
-
+        String ccndadmin_keydir = ccndInterface.getOption(CCND_OPTIONS.CCND_KEYSTORE_DIRECTORY.name());
+		if( ccndadmin_keydir == null ) {
+			File f = _ctx.getDir("ccnd", Context.MODE_PRIVATE );
+			ccndadmin_keydir = f.getAbsolutePath();
+		}
+        UserConfiguration.setUserConfigurationDirectory(ccndadmin_keydir);
+        UserConfiguration.setUserName("ccndadmin"); // XXX Hardcoded value, should be loadable from prefs
+        UserConfiguration.setKeystorePassword("Ccndadm1n#"); // XXX Hardcoded, should be loadable from prefs
         if (defaultForwardingEntryStrings.length > 0) {
         	//
         	// Check each route, split into string parts
         	//
-        	try {
-        	
-        		KeyManager keyManager = loadCCNDKeyManager();
-        		if (keyManager != null) {
-        			Log.d(TAG, "KeyManager is not NULL");
-        		}
-	        	for (int i = 0; i < defaultForwardingEntryStrings.length; i++) {
-	        		final String[] forwardingcmd = defaultForwardingEntryStrings[i].split(" ");
-	        		Log.d(TAG, "Splitting cmd: " + defaultForwardingEntryStrings[i] + " and attempt to configure route");
-		            try {
-		            	//
-		            	// Set a route for each DEFAULT_FORWARDING_ENTRIES item
-		            	//
-		            	for (int j = 0; j < forwardingcmd.length; j++) {
-		            		Log.d(TAG, "CMD[" + j + "] = " + forwardingcmd[j]);
-		            	}
-		            	// if (ccndcontrol.executeCommand(forwardingcmd, keyManager) < 0) {
-		                if (ccndcontrol.executeCommand(forwardingcmd) < 0) {
-		                    Log.e(TAG, "configureDefaultRoutes() Unable to configure forwarding for command because of internal error: " + defaultForwardingEntryStrings[0]);
-		                } else {
-		                	Log.d(TAG, "configureDefaultRoutes() success routing: " + defaultForwardingEntryStrings[0]);
-		                	status--;
-		                }
-		            } catch(Exception e) { // XXX Should catch the actual exception
-		                e.printStackTrace();
-		                Log.e(TAG, "Unable to configure forwarding command, reason: " + e.getMessage());
-		            }
-	        	}
-        	} catch(ConfigurationException ce) {
-        		Log.e(TAG, "configureDefaultRoutes() failed with ConfigurationException: " + ce.getMessage());
-        	} catch(IOException ioe) {
-        		Log.e(TAG, "configureDefaultRoutes() failed with IOException, reason: " + ioe.getMessage());
+        	for (int i = 0; i < defaultForwardingEntryStrings.length; i++) {
+        		final String[] forwardingcmd = defaultForwardingEntryStrings[i].split(" ");
+        		Log.d(TAG, "Splitting cmd: " + defaultForwardingEntryStrings[i] + " and attempt to configure route");
+	            try {
+	            	//
+	            	// Set a route for each DEFAULT_FORWARDING_ENTRIES item
+	            	//
+	            	for (int j = 0; j < forwardingcmd.length; j++) {
+	            		Log.d(TAG, "CMD[" + j + "] = " + forwardingcmd[j]);
+	            	}
+	            	// if (ccndcontrol.executeCommand(forwardingcmd, keyManager) < 0) {
+	                if (ccndcontrol.executeCommand(forwardingcmd) < 0) {
+	                    Log.e(TAG, "configureDefaultRoutes() Unable to configure forwarding for command because of internal error: " + defaultForwardingEntryStrings[0]);
+	                } else {
+	                	Log.d(TAG, "configureDefaultRoutes() success routing: " + defaultForwardingEntryStrings[0]);
+	                	status--;
+	                }
+	            } catch(Exception e) { // XXX Should catch the actual exception
+	                e.printStackTrace();
+	                Log.e(TAG, "Unable to configure forwarding command, reason: " + e.getMessage());
+	            }
         	}
         } else {
         	Log.d(TAG, "configureDefaultRoutes() routes are configured, nothing to do");
