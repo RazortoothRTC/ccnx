@@ -14,7 +14,12 @@
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street,
  * Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
+/*
+ * CCNxTxRxRelay
+ *
+ * Portions Copyright (C) 2014 Razortooth Communications, LLC
+ *
+ */
 package org.ccnx.android.ccnlib;
 
 import java.util.List;

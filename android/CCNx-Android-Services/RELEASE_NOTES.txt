@@ -7,3 +7,6 @@
 * refs #9 Add RELEASE_NOTES.txt to track all changes 
 * refs #13 Refactor package name used for Android Services as we move to CCNxTxRxRelay branding, add new icon
 * refs #14 Add persistent configuration that survives between runs
+* refs #12 Rebrand CCNxAndroidServices as CCNxTxRxRelay
+* refs #24 Implement default forwarding entries in UI
+* refs #27 Implement ccndadmin user keystore to add default forwarding from #24

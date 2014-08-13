@@ -12,7 +12,13 @@
  * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
  * Boston, MA 02110-1301, USA.
  */
-
+/*
+ * CCNxTxRxRelay
+ *
+ * Portions Copyright (C) 2014 Razortooth Communications, LLC
+ *
+ */
+ 
 /**
  * JNI wrapper functions for the ccnd process.  This uses android_main.c to
  * procedurally startup ccnd.
