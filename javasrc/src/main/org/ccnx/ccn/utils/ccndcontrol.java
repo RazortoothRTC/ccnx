@@ -28,6 +28,7 @@ import java.util.Vector;
 import java.util.logging.Level;
 
 import org.ccnx.ccn.CCNHandle;
+import org.ccnx.ccn.KeyManager;
 import org.ccnx.ccn.config.ConfigurationException;
 import org.ccnx.ccn.impl.CCNNetworkManager;
 import org.ccnx.ccn.impl.CCNNetworkManager.NetworkProtocol;
@@ -256,6 +257,7 @@ public class ccndcontrol {
 						    "      ccndcontrol " + extraUsage + "[-v|-vv] -f configfile");
 	}
 
+
 	/**
 	 *Utility function for the ccndcontrol tool.  Initializes the tool,
      * reads the argument list and constructs face to be added.
@@ -266,6 +268,19 @@ public class ccndcontrol {
 	 */
 	@SuppressWarnings("unused")
 	public static int executeCommand(String[] args) {
+		return executeCommand(args, null);
+	}
+
+	/**
+	 *Utility function for the ccndcontrol tool.  Initializes the tool,
+     * reads the argument list and constructs face to be added.
+	 *
+	 * @param args Command line arguments:
+	 *
+	 * @return void
+	 */
+	@SuppressWarnings("unused")
+	public static int executeCommand(String[] args, KeyManager keyManager) {
 		boolean dynamic = false;
 		String configFile = null;
 		int startArg = 0;
@@ -323,7 +338,11 @@ public class ccndcontrol {
 			FaceManager fHandle = null;
 			Integer faceID = null;
 			try {
-				ccnHandle = CCNHandle.open();
+				if (keyManager == null) {
+					ccnHandle = CCNHandle.open();
+				} else {
+					ccnHandle = CCNHandle.open(keyManager);
+				}
 				fHandle = new FaceManager(ccnHandle);
 				if (entry.command == Command.Add) {
 					faceID = fHandle.createFace(entry.protocol, entry.host, entry.port);
