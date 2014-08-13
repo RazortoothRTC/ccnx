@@ -129,6 +129,25 @@
 			android:layout_width="fill_parent">
 		</EditText>
 		<TextView
+			android:id="@+id/default_props_uri"
+			android:textColor="#C81122"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/label_default_props_uri"
+			android:layout_gravity="left"
+			android:layout_marginTop="1px"
+			android:layout_marginBottom="1px"
+			android:textSize="7pt">
+		</TextView>
+		<EditText
+			android:id="@+id/key_default_props_uri"
+			android:layout_height="wrap_content"
+			android:hint="@string/hint_default_props_uri"
+			android:text="@string/val_default_props_uri"
+			android:inputType="text"
+			android:layout_width="fill_parent">
+		</EditText>
+		<TextView
 			android:id="@+id/label_ccnr_debug"
 			android:textColor="#C81122"
 			android:layout_width="wrap_content"

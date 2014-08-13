@@ -14,7 +14,12 @@
  * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
  * Boston, MA 02110-1301, USA.
  */
-
+/*
+ * CCNxTxRxRelay
+ *
+ * Portions Copyright (C) 2014 Razortooth Communications, LLC
+ *
+ */
 package com.rtc.ccnx.droid;
 
 import org.ccnx.android.ccnlib.CCNxServiceControl;
@@ -63,6 +68,12 @@ import java.util.Enumeration;
 import java.util.Collections;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Properties;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 /**
  * Android UI for controlling CCNx services.
  */
@@ -335,6 +346,30 @@ public final class Controller extends Activity implements OnClickListener {
 			if (isValid(val)) {
 				// Set the value into the environment
 				control.setCcndOption(CCND_OPTIONS.CCND_DEFAULT_FORWARDING_ENTRIES, val);
+			}
+
+			// Load Props from a file
+			final EditText defaultPropsURIET = (EditText) findViewById(R.id.key_default_props_uri);  
+			val = defaultPropsURIET.getText().toString();  
+			if (isValid(val)) {
+				File propFile = new File(val);
+				if (propFile.exists() && propFile.isFile() && propFile.canRead()) {
+					try {
+						FileInputStream fis = new FileInputStream(propFile);
+						Properties ccndprops = new Properties();
+						ccndprops.load(fis);
+						System.setProperties(ccndprops);
+						Toast.makeText(_ctx, "Success Loading CCND Props file (loaded " +  ccndprops.size() + " total)", Toast.LENGTH_LONG).show();
+					} catch(FileNotFoundException fnfe) {
+						Log.e(TAG, "Error reading CCND Prop File, reason: " + fnfe.getMessage());
+						Toast.makeText(_ctx, "Error reading CCND Prop File, reason: " + fnfe.getMessage(), Toast.LENGTH_LONG).show();
+					} catch(IOException ioe) {
+						Log.e(TAG, "IO Error reading CCND Prop File, reason: " + ioe.getMessage());
+						Toast.makeText(_ctx, "IO Error reading CCND Prop File, reason: " + ioe.getMessage(), Toast.LENGTH_LONG).show();
+					}
+				} else {
+					Toast.makeText(_ctx, "Error reading CCND Prop File, file is not found", Toast.LENGTH_LONG).show();
+				}
 			}
 			control.startAllInBackground();
 		}
