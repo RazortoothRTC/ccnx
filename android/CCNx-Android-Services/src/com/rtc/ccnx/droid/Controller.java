@@ -341,10 +341,17 @@ public final class Controller extends Activity implements OnClickListener {
 		if (etdefault.length() > 0) {
 			ccnrDir.setText(etdefault);
 		}
+
 		final EditText ccnrGlobalPrefix= (EditText) findViewById(R.id.key_ccnr_global_prefix);  
 		etdefault = mCCNxServicePrefs.getString(CCNR_OPTIONS.CCNR_GLOBAL_PREFIX.name(), RepoService.DEFAULT_REPO_GLOBAL_NAME);
 		if (etdefault.length() > 0) {
 			ccnrGlobalPrefix.setText(etdefault);
+		}
+
+		final EditText defaultPropsURIET = (EditText) findViewById(R.id.key_default_props_uri);  
+		String defaultPropsURI = mCCNxServicePrefs.getString(CCND_OPTIONS.CCND_DEFAULT_PROPS_URI.name(), "");
+		if (isValid(defaultPropsURI)) {
+			defaultPropsURIET.setText(defaultPropsURI);
 		}
 	}
 
@@ -576,6 +583,8 @@ public final class Controller extends Activity implements OnClickListener {
 		                  					Toast.makeText(_ctx, "Success Loading CCND Props file (loaded " +  ccndprops.size() + " total)", Toast.LENGTH_LONG).show();
 		                  				}
 		                  			});
+		                  			// Persist the property for DEFAULT_PROP_URI
+		                  			control.setCcndOption(CCND_OPTIONS.CCND_DEFAULT_PROPS_URI, val);
 						        }
 							} catch(IOException ioe) {
 								Log.e(TAG, "IO Error reading CCND Prop File, reason: " + ioe.getMessage());
@@ -602,6 +611,8 @@ public final class Controller extends Activity implements OnClickListener {
                   						Toast.makeText(_ctx, "Success Loading CCND Props file (loaded " +  ccndprops.size() + " total)", Toast.LENGTH_LONG).show();
                   					}
                   				});
+                  				// Persist the property for DEFAULT_PROP_URI
+		                  		control.setCcndOption(CCND_OPTIONS.CCND_DEFAULT_PROPS_URI, val);
 							} catch(final FileNotFoundException fnfe) {
 								Log.e(TAG, "Error reading CCND Prop File, reason: " + fnfe.getMessage());
 								mHandler.post(new Runnable() {

@@ -43,7 +43,8 @@ public final class CcndWrapper extends CCNxWrapper {
 		CCND_TRYFIB,
 		CCND_AUTOREG,
 		CCND_DEFAULT_FORWARDING_ENTRIES,
-		CCN_LOCAL_PORT
+		CCN_LOCAL_PORT,
+		CCND_DEFAULT_PROPS_URI
 	}
 	
 	public CcndWrapper(Context ctx) {
