@@ -91,7 +91,7 @@ There was never any real testing other than a lone system test done before shipp
 - Integration Tests
 - Stress Tests
 
-Most of this can be acheived using various Android Intstrumentation test classes.
+Most of this can be achieved using various Android Intstrumentation test classes.
 
 Alternative 1
 =============
@@ -102,7 +102,7 @@ Throw out the current design.  Write a new design from scratch, without looking 
 Alternative 2
 =============
 
-Rebuild the design around the model of an NDK native service, no Java code.  It might be easier to acheive a solid design that closely resembles the native C implementation we already have.  This option presents an interesting approach.  It should be possible to create something more immediately stable.  This approach is quite similar to Alternative 1, as it requires tossing out the existing design.  The author believes there is a strong case to be made for not doing this, for starters, not enough time or resources.
+Rebuild the design around the model of an NDK native service, no Java code.  It might be easier to achieve a solid design that closely resembles the native C implementation we already have.  This option presents an interesting approach.  It should be possible to create something more immediately stable.  This approach is quite similar to Alternative 1, as it requires tossing out the existing design.  The author believes there is a strong case to be made for not doing this, for starters, not enough time or resources.
 
 Alternative 3
 =============
