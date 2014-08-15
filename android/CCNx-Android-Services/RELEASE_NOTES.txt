@@ -10,3 +10,6 @@
 * refs #12 Rebrand CCNxAndroidServices as CCNxTxRxRelay
 * refs #24 Implement default forwarding entries in UI
 * refs #27 Implement ccndadmin user keystore to add default forwarding from #24
+* refs #23 Ability to load configuration from URL (over http)
+* refs #29 Add DEFAULT_PROPS_URI to persist to preferences
+* refs #26 Prepare for 0.7.2 release of CCNxTxRxRelay
