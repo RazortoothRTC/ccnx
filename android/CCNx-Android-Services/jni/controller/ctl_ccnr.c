@@ -13,6 +13,12 @@
  * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
  * Boston, MA 02110-1301, USA.
  */
+/*
+ * CCNxTxRxRelay
+ *
+ * Portions Copyright (C) 2014 Razortooth Communications, LLC
+ *
+ */
 #include <jni.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -22,8 +28,8 @@
 
 #include "ccnr_private.h"
 
-#ifndef _Included_org_ccnx_android_services_repo_RepoService
-#define _Included_org_ccnx_android_services_repo_RepoService
+#ifndef _Included_com_rtc_ccnx_droid_repo_RepoService
+#define _Included_com_rtc_ccnx_droid_repo_RepoService
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -41,11 +47,11 @@ androidlogger(void *loggerdata, const char *format, va_list ap)
 }
 
 /*
- * Class:     org_ccnx_android_services_repo_RepoService
+ * Class:     com_rtc_ccnx_droid_repo_RepoService
  * Method:    ccnrCreate
  * Signature: (Ljava/lang/String;)I
  */
-JNIEXPORT jint JNICALL Java_org_ccnx_android_services_repo_RepoService_ccnrCreate
+JNIEXPORT jint JNICALL Java_com_rtc_ccnx_droid_repo_RepoService_ccnrCreate
   (JNIEnv * env, jobject this, jstring version) {
     h = r_init_create("ccnr", androidlogger, NULL);
     if (h == NULL) {
@@ -56,11 +62,11 @@ JNIEXPORT jint JNICALL Java_org_ccnx_android_services_repo_RepoService_ccnrCreat
   }
 
 /*
- * Class:     org_ccnx_android_services_repo_RepoService
+ * Class:     com_rtc_ccnx_droid_repo_RepoService
  * Method:    ccnrRun
  * Signature: ()I
  */
-JNIEXPORT jint JNICALL Java_org_ccnx_android_services_repo_RepoService_ccnrRun
+JNIEXPORT jint JNICALL Java_com_rtc_ccnx_droid_repo_RepoService_ccnrRun
   (JNIEnv * env, jobject this) {
 	__android_log_print(ANDROID_LOG_INFO,"CCNR", "ccnrRun - calling r_dispatch_run(%p)", h);
 	r_dispatch_run(h);
@@ -68,22 +74,22 @@ JNIEXPORT jint JNICALL Java_org_ccnx_android_services_repo_RepoService_ccnrRun
   }
 
 /*
- * Class:     org_ccnx_android_services_repo_RepoService
+ * Class:     com_rtc_ccnx_droid_repo_RepoService
  * Method:    ccnrDestroy
  * Signature: ()I
  */
-JNIEXPORT jint JNICALL Java_org_ccnx_android_services_repo_RepoService_ccnrDestroy
+JNIEXPORT jint JNICALL Java_com_rtc_ccnx_droid_repo_RepoService_ccnrDestroy
   (JNIEnv * env, jobject this) {
 	__android_log_print(ANDROID_LOG_INFO,"CCNR", "ccnrDestroy - ccnr stopping");
 	r_init_destroy(&h);
   }
 
 /*
- * Class:     org_ccnx_android_services_repo_RepoService
+ * Class:     com_rtc_ccnx_droid_repo_RepoService
  * Method:    ccnrKill
  * Signature: ()I
  */
-JNIEXPORT jint JNICALL Java_org_ccnx_android_services_repo_RepoService_ccnrKill
+JNIEXPORT jint JNICALL Java_com_rtc_ccnx_droid_repo_RepoService_ccnrKill
   (JNIEnv * env, jobject this) {
 	if( h != NULL ) {
 		__android_log_print(ANDROID_LOG_INFO,"CCNR", "ccnrKill set kill flag (%p)", h);
@@ -95,11 +101,11 @@ JNIEXPORT jint JNICALL Java_org_ccnx_android_services_repo_RepoService_ccnrKill
   }
 
 /*
- * Class:     org_ccnx_android_services_repo_RepoService
+ * Class:     com_rtc_ccnx_droid_repo_RepoService
  * Method:    ccnrSetenv
  * Signature: (Ljava/lang/String;Ljava/lang/String;I)V
  */
-JNIEXPORT void JNICALL Java_org_ccnx_android_services_repo_RepoService_ccnrSetenv
+JNIEXPORT void JNICALL Java_com_rtc_ccnx_droid_repo_RepoService_ccnrSetenv
   (JNIEnv * env, jobject this, jstring jkey, jstring jvalue, jint joverwrite) {
 	const char *key = (*env)->GetStringUTFChars(env, jkey, NULL);
 	const char *value = (*env)->GetStringUTFChars(env, jvalue, NULL);

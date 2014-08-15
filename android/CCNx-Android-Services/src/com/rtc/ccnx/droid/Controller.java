@@ -14,8 +14,13 @@
  * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
  * Boston, MA 02110-1301, USA.
  */
-
-package org.ccnx.android.services;
+/*
+ * CCNxTxRxRelay
+ *
+ * Portions Copyright (C) 2014 Razortooth Communications, LLC
+ *
+ */
+package com.rtc.ccnx.droid;
 
 import org.ccnx.android.ccnlib.CCNxServiceControl;
 import org.ccnx.android.ccnlib.CCNxServiceCallback;
@@ -24,6 +29,7 @@ import org.ccnx.android.ccnlib.CcndWrapper.CCND_OPTIONS;
 import org.ccnx.android.ccnlib.RepoWrapper.CCNR_OPTIONS;
 import org.ccnx.android.ccnlib.RepoWrapper.REPO_OPTIONS;
 import org.ccnx.android.ccnlib.RepoWrapper.CCNS_OPTIONS;
+import com.rtc.ccnx.droid.repo.RepoService;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -53,11 +59,24 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.Spinner;
 import android.net.Uri;
+import android.content.SharedPreferences;
+import android.os.Handler;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
+import java.util.Collections;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Properties;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.io.InputStream;
 
 /**
  * Android UI for controlling CCNx services.
@@ -77,6 +96,34 @@ public final class Controller extends Activity implements OnClickListener {
 	private CCNxServiceControl control;
 	private String mReleaseVersion = "Unknown";
     private BroadcastReceiver mReceiver;
+    private SharedPreferences mCCNxServicePrefs;
+    private final Handler mHandler = new Handler();
+
+    // Attribution for this approach to pre-initializing a map
+    // http://stackoverflow.com/a/509016/796514
+    // Thank you SO
+    private static final Map<String, Integer> DEBUG_MAP = createDebugMap();
+    private static Map<String, Integer> createDebugMap() {
+        Map<String, Integer> result = new HashMap<String, Integer>();
+        result.put("WARNING", 0);
+        result.put("SEVERE", 1);
+        result.put("ERROR", 2);
+        result.put("FINE", 3);
+        result.put("FINER", 4);
+        result.put("FINEST", 5);
+        result.put("NONE", 6);
+        return Collections.unmodifiableMap(result);
+        // From arrays.xml , update the above map if we change the ordering
+        /*
+        <item>@string/debug_warning</item>
+		<item>@string/debug_severe</item>
+		<item>@string/debug_error</item>
+		<item>@string/debug_fine</item>
+		<item>@string/debug_finer</item>
+		<item>@string/debug_finest</item>
+		<item>@string/debug_none</item>
+		*/
+    }
 
 	// Create a handler to receive status updates
 	private final Handler _handler = new Handler() {
@@ -193,12 +240,15 @@ public final class Controller extends Activity implements OnClickListener {
 	}
     private void init(){
 		Log.d(TAG, "init()");
+		mCCNxServicePrefs = this.getSharedPreferences("ccnxserviceprefs", MODE_WORLD_READABLE);
+    	
     	control = new CCNxServiceControl(this);
     	control.registerCallback(cb);
     	control.connect();
     	try {
     		PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-			mReleaseVersion = TAG + " " + pInfo.versionName;
+			mReleaseVersion = getTitle() + " v" + pInfo.versionName;
+			setTitle(getTitle() + "(v" + pInfo.versionName + ")");
 		} catch(NameNotFoundException e) {
 			Log.e(TAG, "Could not find package name.  Reason: " + e.getMessage());
 		}
@@ -240,64 +290,7 @@ public final class Controller extends Activity implements OnClickListener {
 	 * Start all services in the background
 	 */
 	private void allButton(){
-        // Always disable the button after a click until we
-        // reach a stable state, or hit error condition
-        mAllBtn.setEnabled(false);
-        mAllBtn.setText(R.string.allStartButton_Processing);
-
-        Log.d(TAG, "Disabling All Button");
-		if(control.isAllRunning()){
-			// Everything is ready, we must stop
-			control.stopAll();
-		} else { /* Note, this doesn't take into account partially running state */
-			// Not all running... attempt to start them
-			// but first, get the user settings
-			// Consider these to be our defaults
-			// We don't really check validity of the data in terms of constraints
-			// so we should shore this up to be more robust
-			final EditText ccnrDir = (EditText) findViewById(R.id.key_ccnr_directory);  
-			String val = ccnrDir.getText().toString();  
-			if (isValid(val)) {
-				control.setCcnrOption(CCNR_OPTIONS.CCNR_DIRECTORY, val);
-			} else {
-				// Toast it, and return (so the user fixes the bum field)
-				Toast.makeText(this, "CCNR_DIRECTORY field is not valid.  Please set and then start.", 10).show();
-				return;
-			}
-			
-			final EditText ccnrGlobalPrefix= (EditText) findViewById(R.id.key_ccnr_global_prefix);  
-			val = ccnrGlobalPrefix.getText().toString();  
-			if (isValid(val)) {
-				control.setCcnrOption(CCNR_OPTIONS.CCNR_GLOBAL_PREFIX, val);
-			} else {
-				// Toast it, and return (so the user fixes the bum field)
-				Toast.makeText(this, "CCNR_GLOBAL_PREFIX field is not valid.  Please set and then start.", 10).show();
-				return;
-			}
-			
-			final Spinner ccnrDebugSpinner = (Spinner) findViewById(R.id.key_ccnr_debug);  
-			val = ccnrDebugSpinner.getSelectedItem().toString();
-			if (isValid(val)) {
-				control.setCcnrOption(CCNR_OPTIONS.CCNR_DEBUG, val);
-			} else {
-				// Toast it, and return (so the user fixes the bum field)
-				// XXX I Don't think this will ever happen
-				Toast.makeText(this, "CCNR_DEBUG field is not valid.  Please set and then start.", 10).show();
-				return;
-			}
-			final Spinner ccnsDebugSpinner = (Spinner) findViewById(R.id.key_ccns_debug);  
-			val = ccnsDebugSpinner.getSelectedItem().toString();
-			if (isValid(val)) {
-				control.setSyncOption(CCNS_OPTIONS.CCNS_DEBUG, val);
-			} else {
-				// Toast it, and return (so the user fixes the bum field)
-				// XXX I Don't think this will ever happen
-				Toast.makeText(this, "CCNS_DEBUG field is not valid.  Please set and then start.", 10).show();
-				return;
-			}
-			control.startAllInBackground();
-		}
-		// updateState();
+		new AllButtonAsyncTask().execute();
 	}
 
 	private void initUI() {
@@ -311,19 +304,54 @@ public final class Controller extends Activity implements OnClickListener {
         //
         // Grab the LinearLayout in the 0th child element
         //
-        
         ViewGroup layout = (ViewGroup) findViewById(R.id.scrollcontainer); // .getChildAt(0);
         ViewGroup layoutchild = (ViewGroup) layout.getChildAt(0);
         if (Build.VERSION.SDK_INT >= 0x0000000e) { // ICS or greater, requires at least SDK 14 to compile
 			final android.widget.Switch swbtn = new android.widget.Switch(this);
+			Log.d(TAG, "Got CCNS_ENABLE set to: " + mCCNxServicePrefs.getString(CCNS_OPTIONS.CCNS_ENABLE.name(), "1"));
 			swbtn.setOnCheckedChangeListener(new ToggleOptionChangeListener(CCNS_OPTIONS.CCNS_ENABLE));
-			swbtn.setChecked(true);
+			if (mCCNxServicePrefs.getString(CCNS_OPTIONS.CCNS_ENABLE.name(), "1").equals("1")) {
+				swbtn.setChecked(true);
+			} else {
+				swbtn.setChecked(false);
+			}
 			layoutchild.addView(swbtn);
 		} else { // Fall back to pre-ICS widget
 			android.widget.ToggleButton tbtn = new android.widget.ToggleButton(this);
 			tbtn.setOnCheckedChangeListener(new ToggleOptionChangeListener(CCNS_OPTIONS.CCNS_ENABLE));
-			tbtn.setChecked(true);
+			if (mCCNxServicePrefs.getString(CCNS_OPTIONS.CCNS_ENABLE.name(), "1").equals("1")) {
+				tbtn.setChecked(true);
+			} else {
+				tbtn.setChecked(false);
+			}
 			layoutchild.addView(tbtn);
+		}
+
+		final Spinner ccnrDebugSpinner = (Spinner) findViewById(R.id.key_ccnr_debug);  
+		if (!mCCNxServicePrefs.getString(CCNR_OPTIONS.CCNR_DEBUG.name(), "WARNING").equals("WARNING")) {
+			ccnrDebugSpinner.setSelection(DEBUG_MAP.get(mCCNxServicePrefs.getString(CCNR_OPTIONS.CCNR_DEBUG.name(), "WARNING")));
+		}
+		final Spinner ccnsDebugSpinner = (Spinner) findViewById(R.id.key_ccns_debug);
+		if (!mCCNxServicePrefs.getString(CCNS_OPTIONS.CCNS_DEBUG.name(), "WARNING").equals("WARNING")) {
+			ccnsDebugSpinner.setSelection(DEBUG_MAP.get(mCCNxServicePrefs.getString(CCNS_OPTIONS.CCNS_DEBUG.name(), "WARNING")));
+		}
+
+		final EditText ccnrDir = (EditText) findViewById(R.id.key_ccnr_directory);  
+		String etdefault = mCCNxServicePrefs.getString(CCNR_OPTIONS.CCNR_DIRECTORY.name(), RepoService.DEFAULT_REPO_DIR);
+		if (etdefault.length() > 0) {
+			ccnrDir.setText(etdefault);
+		}
+
+		final EditText ccnrGlobalPrefix= (EditText) findViewById(R.id.key_ccnr_global_prefix);  
+		etdefault = mCCNxServicePrefs.getString(CCNR_OPTIONS.CCNR_GLOBAL_PREFIX.name(), RepoService.DEFAULT_REPO_GLOBAL_NAME);
+		if (etdefault.length() > 0) {
+			ccnrGlobalPrefix.setText(etdefault);
+		}
+
+		final EditText defaultPropsURIET = (EditText) findViewById(R.id.key_default_props_uri);  
+		String defaultPropsURI = mCCNxServicePrefs.getString(CCND_OPTIONS.CCND_DEFAULT_PROPS_URI.name(), "");
+		if (isValid(defaultPropsURI)) {
+			defaultPropsURIET.setText(defaultPropsURI);
 		}
 	}
 
@@ -440,6 +468,183 @@ public final class Controller extends Activity implements OnClickListener {
 	    protected void onPostExecute(String result) {
 			super.onPostExecute(result);
 			Controller.this.updateIPAddress(result);
+	    }
+	}
+
+	private class AllButtonAsyncTask extends AsyncTask<Void, Void, Void>  {
+
+	    @Override
+		protected Void doInBackground(Void... params) {
+			// Always disable the button after a click until we
+	        // reach a stable state, or hit error condition
+	        Controller.this.runOnUiThread(new Runnable() {
+	          public void run() {
+	            mAllBtn.setEnabled(false);
+	        	mAllBtn.setText(R.string.allStartButton_Processing);
+	          }
+        	});
+	        
+
+	        Log.d(TAG, "Disabling All Button");
+			if(control.isAllRunning()){
+				// Everything is ready, we must stop
+				control.stopAll();
+			} else { /* Note, this doesn't take into account partially running state */
+				// Not all running... attempt to start them
+				// but first, get the user settings
+				// Consider these to be our defaults
+				// We don't really check validity of the data in terms of input constraints
+				// so we should shore this up to be more robust
+				final EditText ccnrDir = (EditText) findViewById(R.id.key_ccnr_directory);  
+				String val = ccnrDir.getText().toString();  
+				if (isValid(val)) {
+					control.setCcnrOption(CCNR_OPTIONS.CCNR_DIRECTORY, val);
+				} else {
+					// Toast it, and return (so the user fixes the bum field)
+					Toast.makeText(Controller.this, "CCNR_DIRECTORY field is not valid.  Please set and then start.", 10).show();
+					return null;
+				}
+
+				final EditText ccnrGlobalPrefix= (EditText) findViewById(R.id.key_ccnr_global_prefix);  
+				val = ccnrGlobalPrefix.getText().toString();  
+				if (isValid(val)) {
+					control.setCcnrOption(CCNR_OPTIONS.CCNR_GLOBAL_PREFIX, val);
+				} else {
+					// Toast it, and return (so the user fixes the bum field)
+					Toast.makeText(Controller.this, "CCNR_GLOBAL_PREFIX field is not valid.  Please set and then start.", 10).show();
+					return null;
+				}
+
+				final Spinner ccnrDebugSpinner = (Spinner) findViewById(R.id.key_ccnr_debug);  
+				val = ccnrDebugSpinner.getSelectedItem().toString();
+				if (isValid(val)) {
+					control.setCcnrOption(CCNR_OPTIONS.CCNR_DEBUG, val);
+				} else {
+					// Toast it, and return (so the user fixes the bum field)
+					// XXX I Don't think this will ever happen
+					Toast.makeText(Controller.this, "CCNR_DEBUG field is not valid.  Please set and then start.", 10).show();
+					return null;
+				}
+
+				final Spinner ccnsDebugSpinner = (Spinner) findViewById(R.id.key_ccns_debug);  
+				val = ccnsDebugSpinner.getSelectedItem().toString();
+				if (isValid(val)) {
+					control.setSyncOption(CCNS_OPTIONS.CCNS_DEBUG, val);
+				} else {
+					// Toast it, and return (so the user fixes the bum field)
+					// XXX I Don't think this will ever happen
+					Toast.makeText(Controller.this, "CCNS_DEBUG field is not valid.  Please set and then start.", 10).show();
+					return null;
+				}
+
+				final EditText defaultForwardingEntriesET = (EditText) findViewById(R.id.key_default_forwarding_entries);  
+				val = defaultForwardingEntriesET.getText().toString();  
+				if (isValid(val)) {
+					// Set the value into the environment
+					control.setCcndOption(CCND_OPTIONS.CCND_DEFAULT_FORWARDING_ENTRIES, val);
+				}
+
+				// Load Props from a file
+				final EditText defaultPropsURIET = (EditText) findViewById(R.id.key_default_props_uri);  
+				val = defaultPropsURIET.getText().toString();  
+
+				if (isValid(val)) {
+					//
+					// Attribution for a nice, complete url matcher:
+					// http://stackoverflow.com/a/3809435/796514
+					// Thanks SO
+					//
+					if (val.startsWith("http")) {
+						if (val.matches("(https?:\\/\\/(?:www\\.|(?!www))[^\\s\\.]+\\.[^\\s]{2,}|www\\.[^\\s]+\\.[^\\s]{2,})")) {
+							mHandler.post(new Runnable() {
+                  				public void run() {
+                  					Toast.makeText(_ctx, "Loading from url", Toast.LENGTH_LONG).show();
+                  				}
+                  			});
+							
+							final String propurl = val;
+                			try {
+								URL url = new URL(propurl);
+						        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+						        conn.setRequestMethod("GET");
+						        conn.setReadTimeout(60*1000);
+						        int responseCode = conn.getResponseCode();
+						 
+						        // always check HTTP response code first
+						        if (responseCode == HttpURLConnection.HTTP_OK) {
+									int contentLength = conn.getContentLength();
+	 								InputStream is = conn.getInputStream();
+	             					
+						           	final Properties ccndprops = new Properties();
+									ccndprops.load(is); 
+						            is.close();
+						            mHandler.post(new Runnable() {
+		                  				public void run() {
+		                  					Toast.makeText(_ctx, "Success Loading CCND Props file (loaded " +  ccndprops.size() + " total)", Toast.LENGTH_LONG).show();
+		                  				}
+		                  			});
+		                  			// Persist the property for DEFAULT_PROP_URI
+		                  			control.setCcndOption(CCND_OPTIONS.CCND_DEFAULT_PROPS_URI, val);
+						        }
+							} catch(IOException ioe) {
+								Log.e(TAG, "IO Error reading CCND Prop File, reason: " + ioe.getMessage());
+								Toast.makeText(_ctx, "IO Error reading CCND Prop File, reason: " + ioe.getMessage(), Toast.LENGTH_LONG).show();
+							}
+						} else {
+							Log.e(TAG, "Invalid URL used: " + val);
+							mHandler.post(new Runnable() {
+                  				public void run() {
+                  					Toast.makeText(_ctx, "Invalid or malformed URL used, ingoring", Toast.LENGTH_LONG).show();
+                  				}
+                  			});
+						}
+					} else {
+						File propFile = new File(val);
+						if (propFile.exists() && propFile.isFile() && propFile.canRead()) {
+							try {
+								FileInputStream fis = new FileInputStream(propFile);
+								final Properties ccndprops = new Properties();
+								ccndprops.load(fis);
+								System.setProperties(ccndprops);
+								mHandler.post(new Runnable() {
+                  					public void run() {
+                  						Toast.makeText(_ctx, "Success Loading CCND Props file (loaded " +  ccndprops.size() + " total)", Toast.LENGTH_LONG).show();
+                  					}
+                  				});
+                  				// Persist the property for DEFAULT_PROP_URI
+		                  		control.setCcndOption(CCND_OPTIONS.CCND_DEFAULT_PROPS_URI, val);
+							} catch(final FileNotFoundException fnfe) {
+								Log.e(TAG, "Error reading CCND Prop File, reason: " + fnfe.getMessage());
+								mHandler.post(new Runnable() {
+                  					public void run() {
+                  						Toast.makeText(_ctx, "Error reading CCND Prop File, reason: " + fnfe.getMessage(), Toast.LENGTH_LONG).show();
+                  					}
+                  				});
+							} catch(final IOException ioe) {
+								Log.e(TAG, "IO Error reading CCND Prop File, reason: " + ioe.getMessage());
+								mHandler.post(new Runnable() {
+                  					public void run() {
+                  						Toast.makeText(_ctx, "IO Error reading CCND Prop File, reason: " + ioe.getMessage(), Toast.LENGTH_LONG).show();
+                  					}
+                  				});
+							}
+						} else {
+							mHandler.post(new Runnable() {
+              					public void run() {
+              						Toast.makeText(_ctx, "Error reading CCND Prop File, file is not found", Toast.LENGTH_LONG).show();
+              					}
+                  			});
+						}
+					}
+				}
+				control.startAllInBackground();
+			}
+			return null;
+		}
+
+	    @Override
+	    protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
 	    }
 	}
 }

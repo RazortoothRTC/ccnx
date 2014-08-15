@@ -14,7 +14,12 @@
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street,
  * Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
+/*
+ * CCNxTxRxRelay
+ *
+ * Portions Copyright (C) 2014 Razortooth Communications, LLC
+ *
+ */
 package org.ccnx.android.ccnlib;
 
 import java.util.List;
@@ -111,7 +116,10 @@ public abstract class CCNxWrapper {
 	public void bindIfRunning(){
 		Log.d(TAG,"If Running, Bind");
 		if(isRunning()){
+			Log.d(TAG,"Is Running, go ahead and bind");
 			bindService();
+		} else {
+			Log.d(TAG,"Is not running, don't bind");
 		}
 	}
 	
@@ -248,6 +256,10 @@ public abstract class CCNxWrapper {
 	
 	public void setOption(String key, String value) {
 		options.setProperty(key, value);
+	}
+
+	public String getOption(String key) {
+		return options.getProperty(key);
 	}
 	
 	public void clearOptions() {

@@ -22,12 +22,20 @@ import org.ccnx.android.ccnlib.CcndWrapper.CCND_OPTIONS;
 import org.ccnx.android.ccnlib.RepoWrapper.REPO_OPTIONS;
 import org.ccnx.android.ccnlib.RepoWrapper.CCNS_OPTIONS;
 import org.ccnx.android.ccnlib.RepoWrapper.CCNR_OPTIONS;
+import org.ccnx.ccn.KeyManager;
+import org.ccnx.ccn.impl.security.keys.BasicKeyManager;
+import org.ccnx.ccn.utils.ccndcontrol;
+import org.ccnx.ccn.config.ConfigurationException;
+import org.ccnx.ccn.config.UserConfiguration;
 
 import android.content.Context;
 import android.util.Log;
 import android.os.Environment;
+import android.os.AsyncTask;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 /**
  * This is a helper class to access the ccnd and repo services. It provides
@@ -129,6 +137,7 @@ public final class CCNxServiceControl {
 	 * @return true if everything started correctly, false otherwise
 	 */
 	public boolean startAll(){
+		Log.d(TAG, "startAll()");
 		if (checkSystemOK()) {
 			newCCNxAPIStatus(SERVICE_STATUS.START_ALL_INITIALIZING);
 			Log.i(TAG,"startAll waiting for CCND startService");
@@ -141,6 +150,9 @@ public final class CCNxServiceControl {
 				newCCNxAPIStatus(SERVICE_STATUS.START_ALL_ERROR);
 				return false;
 			}
+			// Go ahead and set default forwarding
+			new AsyncDefaultForwardingConfigTask().execute();
+
 			Log.i(TAG,"startAll waiting for REPO startService");
 			repoInterface.startService();
 			Log.i(TAG,"startAll waiting for REPO waitForReady");
@@ -167,6 +179,7 @@ public final class CCNxServiceControl {
 	 * has started then you should register a callback before issuing this call.
 	 */
 	public void startAllInBackground(){
+		Log.d(TAG, "startAllInBackground");
 		Runnable r = new Runnable(){
 			public void run() {
 				startAll();
@@ -309,4 +322,103 @@ public final class CCNxServiceControl {
 	public SERVICE_STATUS getRepoStatus(){
 		return repoStatus;
 	}
+
+	private class AsyncDefaultForwardingConfigTask extends AsyncTask<Void,Void,Void>{
+	    @Override
+	    protected Void doInBackground(Void... unused) {
+	      Log.d(TAG, "configure default routes");
+	      configureDefaultRoutes();
+	        
+	      return(null);
+	    }
+
+	    @Override
+	    protected void onProgressUpdate(Void... unused) {
+	      // setProgressPercent(0);
+	    }
+	    
+	    @Override
+	    protected void onPreExecute() {
+	    }
+
+	    @Override
+	    protected void onPostExecute(Void unused) {
+	    }
+	}
+
+	private KeyManager loadCCNDKeyManager() throws ConfigurationException, IOException {
+		// Borrow a bunch of this code directly from CcndService
+		char[] KEYSTORE_PASS = "\010\043\103\375\327\237\152\351\155".toCharArray();
+
+		String ccnd_port = ccndInterface.getOption(CCND_OPTIONS.CCN_LOCAL_PORT.name());
+		if( ccnd_port == null ) {
+			ccnd_port = "9695";
+		}
+
+		String ccnd_keydir = ccndInterface.getOption(CCND_OPTIONS.CCND_KEYSTORE_DIRECTORY.name());
+		if( ccnd_keydir == null ) {
+			File f = _ctx.getDir("ccnd", Context.MODE_PRIVATE );
+			ccnd_keydir = f.getAbsolutePath();
+		}
+		String keystore_name = ".ccnd_keystore_";
+
+		BasicKeyManager keyManager = new BasicKeyManager("CCND", ccnd_keydir, null, keystore_name + ccnd_port, null, "ccnd", KEYSTORE_PASS);
+		Log.d(TAG, "ccnd_keydir = " + ccnd_keydir);
+		Log.d(TAG, "keystore_name = " + keystore_name + ccnd_port);
+		Log.d(TAG, "loadCCNDKeyManager() succesfully called");
+		return keyManager;
+	}
+
+	public int configureDefaultRoutes() {
+    	int status = 0;
+    	//
+        // Let's try to create the routes if there are any set
+        //
+        final String defaultForwardingEntriesProp = ccndInterface.getOption(CCND_OPTIONS.CCND_DEFAULT_FORWARDING_ENTRIES.name());
+        String defaultForwardingEntryStrings[] = defaultForwardingEntriesProp.split(",");
+        // String keystoredir = ccndInterface.getOption(CCND_OPTIONS.CCND_KEYSTORE_DIRECTORY.name());
+        // String keystorename = 
+
+        //
+        // Calls to ccndcontrol get an exception java.lang.NullPointerException: Attempt to invoke virtual method 'byte[] org.ccnx.ccn.protocol.PublisherPublicKeyDigest.digest()' on a null object reference
+        //
+        String ccndadmin_keydir = ccndInterface.getOption(CCND_OPTIONS.CCND_KEYSTORE_DIRECTORY.name());
+		if( ccndadmin_keydir == null ) {
+			File f = _ctx.getDir("ccnd", Context.MODE_PRIVATE );
+			ccndadmin_keydir = f.getAbsolutePath();
+		}
+        UserConfiguration.setUserConfigurationDirectory(ccndadmin_keydir);
+        UserConfiguration.setUserName("ccndadmin"); // XXX Hardcoded value, should be loadable from prefs
+        UserConfiguration.setKeystorePassword("Ccndadm1n#"); // XXX Hardcoded, should be loadable from prefs
+        if (defaultForwardingEntryStrings.length > 0) {
+        	//
+        	// Check each route, split into string parts
+        	//
+        	for (int i = 0; i < defaultForwardingEntryStrings.length; i++) {
+        		final String[] forwardingcmd = defaultForwardingEntryStrings[i].split(" ");
+        		Log.d(TAG, "Splitting cmd: " + defaultForwardingEntryStrings[i] + " and attempt to configure route");
+	            try {
+	            	//
+	            	// Set a route for each DEFAULT_FORWARDING_ENTRIES item
+	            	//
+	            	for (int j = 0; j < forwardingcmd.length; j++) {
+	            		Log.d(TAG, "CMD[" + j + "] = " + forwardingcmd[j]);
+	            	}
+	            	// if (ccndcontrol.executeCommand(forwardingcmd, keyManager) < 0) {
+	                if (ccndcontrol.executeCommand(forwardingcmd) < 0) {
+	                    Log.e(TAG, "configureDefaultRoutes() Unable to configure forwarding for command because of internal error: " + defaultForwardingEntryStrings[0]);
+	                } else {
+	                	Log.d(TAG, "configureDefaultRoutes() success routing: " + defaultForwardingEntryStrings[0]);
+	                	status--;
+	                }
+	            } catch(Exception e) { // XXX Should catch the actual exception
+	                e.printStackTrace();
+	                Log.e(TAG, "Unable to configure forwarding command, reason: " + e.getMessage());
+	            }
+        	}
+        } else {
+        	Log.d(TAG, "configureDefaultRoutes() routes are configured, nothing to do");
+        }
+        return status;
+    }
 }

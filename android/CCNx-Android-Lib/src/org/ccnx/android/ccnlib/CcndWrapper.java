@@ -14,7 +14,12 @@
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street,
  * Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
+/*
+ * CCNxTxRxRelay
+ *
+ * Portions Copyright (C) 2014 Razortooth Communications, LLC
+ *
+ */
 package org.ccnx.android.ccnlib;
 
 import android.content.Context;
@@ -36,7 +41,10 @@ public final class CcndWrapper extends CCNxWrapper {
 		CCND_CAP,
 		CCND_DATA_PAUSE_MICROSEC,
 		CCND_TRYFIB,
-		CCN_LOCAL_PORT
+		CCND_AUTOREG,
+		CCND_DEFAULT_FORWARDING_ENTRIES,
+		CCN_LOCAL_PORT,
+		CCND_DEFAULT_PROPS_URI
 	}
 	
 	public CcndWrapper(Context ctx) {

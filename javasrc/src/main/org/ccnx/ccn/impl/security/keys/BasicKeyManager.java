@@ -182,7 +182,7 @@ public class BasicKeyManager extends KeyManager {
 	}
 	
 	/**
-	 * Default constructor, takes all parameters from defaults in UserCOnfiguration.
+	 * Default constructor, takes all parameters from defaults in UserConfiguration.
 	 * @throws IOException 
 	 * @throws ConfigurationException 
 	 */
