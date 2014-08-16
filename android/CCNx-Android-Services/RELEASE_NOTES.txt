@@ -1,0 +1,19 @@
+0.8.0
+=====
+* refs #36 Prepare CCNxTxRxRelay 0.8.0 to publish to Google Play Store
+
+0.7.2
+=====
+* refs #3 Reset versioning (was fixed on 1.0.0 for years) to match the associated CCNx release
+* 80e5200 refs #7 Add version string to app title
+* 63f57bd refs #6 Fix for Orientation Change crashes, lock into portrait mode
+* 2c4285b refs #1 Write up Technical Note 1 to help explain the basis for the work
+* refs #9 Add RELEASE_NOTES.txt to track all changes 
+* refs #13 Refactor package name used for Android Services as we move to CCNxTxRxRelay branding, add new icon
+* refs #14 Add persistent configuration that survives between runs
+* refs #12 Rebrand CCNxAndroidServices as CCNxTxRxRelay
+* refs #24 Implement default forwarding entries in UI
+* refs #27 Implement ccndadmin user keystore to add default forwarding from #24
+* refs #23 Ability to load configuration from URL (over http)
+* refs #29 Add DEFAULT_PROPS_URI to persist to preferences
+* refs #26 Prepare for 0.7.2 release of CCNxTxRxRelay

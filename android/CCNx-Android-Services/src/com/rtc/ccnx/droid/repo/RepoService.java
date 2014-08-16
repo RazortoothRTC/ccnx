@@ -15,7 +15,7 @@
  * Boston, MA 02110-1301, USA.
  */
 
-package org.ccnx.android.services.repo;
+package com.rtc.ccnx.droid.repo;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -29,7 +29,7 @@ import org.ccnx.android.ccnlib.CCNxServiceStatus.SERVICE_STATUS;
 import org.ccnx.android.ccnlib.RepoWrapper.REPO_OPTIONS;
 import org.ccnx.android.ccnlib.RepoWrapper.CCNR_OPTIONS;
 import org.ccnx.android.ccnlib.RepoWrapper.CCNS_OPTIONS;
-import org.ccnx.android.services.CCNxService;
+import com.rtc.ccnx.droid.CCNxService;
 import org.ccnx.ccn.config.UserConfiguration;
 import org.ccnx.ccn.impl.repo.LogStructRepoStore;
 import org.ccnx.ccn.impl.repo.RepositoryServer;
@@ -44,7 +44,7 @@ import android.util.Log;
  * CCNxService specialization for the Repository.
  */
 public final class RepoService extends CCNxService {
-	public static final String CLASS_TAG = "CCNxRepoService"; 
+	public static final String CLASS_TAG = "CCNx RepoService"; 
 	
 	private RepositoryServer _server=null;
 	private RepositoryStore _repo=null;
@@ -86,13 +86,12 @@ public final class RepoService extends CCNxService {
 		Log.d(TAG, "onStartService - Starting");
 		boolean isPrefSet = false;
 
-		// Get all the CCND options from the intent 
+		// Get all the REPO options from the intent 
 		// If no option is found on intent, look in System properties
 		// If no system property is set, fallback to preferences
 		// And while settings OPTIONS, set preferences
 		// We will only attempt a recovery if we are running REPO 2.0.0
 		SharedPreferences.Editor prefsEditor = mCCNxServicePrefs.edit();
-
 		if (intent != null) {
 			if (Pattern.matches("1\\.0\\.0", repo_version)) {
 				try {
@@ -142,36 +141,81 @@ public final class RepoService extends CCNxService {
 					repo_namespace = DEFAULT_REPO_NAMESPACE;
 				}	
 			} else if (Pattern.matches("2\\.0\\.0", repo_version)) {
+				//
+				// Always load from prefs, but allow for override from Intent OPTION or System
+				// Env
+				//
+				options = new HashMap<String, String>((HashMap<String, String>)mCCNxServicePrefs.getAll());
+
 				for( CCNR_OPTIONS opt : CCNR_OPTIONS.values() ) {
+					// XXX I think this breaks any use of prefs
+					/*
 					if(!intent.hasExtra(opt.name())){
 						continue;
 					}
+					*/
+					//
+					// If the OPTION isn't in the Intent, Give precedence to
+					// 1. Intent OPTION
+					// 2. System Properties
+					// 3. Preferences
+					//
 					String s = intent.getStringExtra( opt.name() );
-					if( null == s ) 
+					if(s == null)  {
+						Log.d(TAG, "attempting to set option from System props");
 						s = System.getProperty(opt.name());
-						Log.d(TAG,"setting option " + opt.name() + " = " + s);
+						if (s == null) {
+							Log.d(TAG, "attempting to set option from preferences");
+							s = options.get(opt.name());
+						}
+					} else {
+						Log.d(TAG, "Use option from Intent");
+					}
+					
 					if( s != null ) {
+						Log.d(TAG,"setting option as pref " + opt.name() + " = " + s);
 						options.put(opt.name(), s);
 						isPrefSet = true;
 						prefsEditor.putString(opt.name(), s);
 					}
 				}
 				for( CCNS_OPTIONS opt : CCNS_OPTIONS.values() ) {
+					// XXX I think this breaks any use of prefs
+					/*
 					if(!intent.hasExtra(opt.name())){
 						continue;
 					}
+					*/
+					//
+					// If the OPTION isn't in the Intent, Give precedence to
+					// 1. Intent OPTION
+					// 2. System Properties
+					// 3. Preferences
+					//
 					String s = intent.getStringExtra( opt.name() );
-					if( null == s ) 
+					if(s == null) {
+						Log.d(TAG, "attempting to set option from System props");
 						s = System.getProperty(opt.name());
-						Log.d(TAG,"setting option " + opt.name() + " = " + s);
+						if (s == null) {
+							Log.d(TAG, "attempting to set option from preferences");
+							s = options.get(opt.name());
+						}
+					} else {
+						Log.d(TAG, "Use option from Intent");
+					}
+						
 					if( s != null ) {
+						Log.d(TAG,"setting option as pref " + opt.name() + " = " + s);
 						options.put(opt.name(), s);
 						isPrefSet = true;
 						prefsEditor.putString(opt.name(), s);
 					}
 				}
-				if (isPrefSet) {
+				if (isPrefSet == true) {
+					Log.d(TAG, "Commit prefs changes");
 					prefsEditor.commit();
+				} else {
+					Log.d(TAG, "No prefs to commit");
 				}
 			} else {
 				Log.d(TAG,"Unknown Repo version " + repo_version + " specified, failed to start Repo.");
@@ -179,6 +223,7 @@ public final class RepoService extends CCNxService {
 			}
 		} else {
 			// We must load options from prefs
+			Log.d(TAG, "No data in intent, loading options from prefs");
 			options = new HashMap<String, String>((HashMap<String, String>)mCCNxServicePrefs.getAll());
 		}
 		Load();

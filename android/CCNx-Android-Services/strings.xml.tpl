@@ -31,7 +31,13 @@
     <string name="label_ok">OK</string>
     <string name="label_ccndstatus">CCND Status</string>
     <string name="service_started1_msg">CCNx Service Control started</string>
-    <string name="about_text">CCNx PROJECT_NUMBER\n/*
+    <string name="about_text">CCNx PROJECT_NUMBER\n
+/*
+ * CCNxTxRxRelay
+ *
+ * Portions Copyright (C) 2014 Razortooth Communications, LLC\n
+ */
+/*
  *
  * CCNx Android Services\m
  *\m

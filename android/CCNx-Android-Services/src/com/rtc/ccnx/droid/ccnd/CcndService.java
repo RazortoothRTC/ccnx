@@ -14,8 +14,13 @@
  * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
  * Boston, MA 02110-1301, USA.
  */
-
-package org.ccnx.android.services.ccnd;
+/*
+ * CCNxTxRxRelay
+ *
+ * Portions Copyright (C) 2014 Razortooth Communications, LLC
+ *
+ */
+package com.rtc.ccnx.droid.ccnd;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -24,7 +29,7 @@ import java.util.HashMap;
 
 import org.ccnx.android.ccnlib.CCNxServiceStatus.SERVICE_STATUS;
 import org.ccnx.android.ccnlib.CcndWrapper.CCND_OPTIONS;
-import org.ccnx.android.services.CCNxService;
+import com.rtc.ccnx.droid.CCNxService;
 import org.ccnx.ccn.impl.security.keys.BasicKeyManager;
 import org.ccnx.android.ccnlib.CCNxLibraryCheck;
 
@@ -44,7 +49,7 @@ import android.util.Log;
  * nothing using the unix domain socket on Android. 
  */
 public final class CcndService extends CCNxService {
-	public static final String CLASS_TAG = "CCNxCCNdService";
+	public static final String CLASS_TAG = "CCNx CCNdService";
 	
 	private String KEYSTORE_NAME = ".ccnd_keystore_";
 	private final static char [] KEYSTORE_PASS = "\010\043\103\375\327\237\152\351\155".toCharArray();
@@ -80,17 +85,40 @@ public final class CcndService extends CCNxService {
 		// And while settings OPTIONS, set preferences
 		SharedPreferences.Editor prefsEditor = mCCNxServicePrefs.edit();
         
-        
+		//
+		// Always load from prefs, but allow for override from Intent OPTION or System
+		// Env
+		//
+		options = new HashMap<String, String>((HashMap<String, String>)mCCNxServicePrefs.getAll());
         if (intent != null) {
 			for( CCND_OPTIONS opt : CCND_OPTIONS.values() ) {
+				// XXX I think this breaks any use of prefs
+				/*
 				if(! intent.hasExtra(opt.name())){
 					continue;
 				}
+				*/
+
+				//
+				// If the OPTION isn't in the Intent, Give precedence to
+				// 1. Intent OPTION
+				// 2. System Properties
+				// 3. Preferences
+				//
 				String s = intent.getStringExtra( opt.name() );
-				if( null == s ) 
+				if (s == null) {
+					Log.d(TAG, "attempting to set option from System props");
 					s = System.getProperty(opt.name());
-					Log.d(TAG,"setting option " + opt.name() + " = " + s);
-				if( s != null ) {
+					if (s == null) {
+						Log.d(TAG, "attempting to set option from preferences");
+						s = options.get(opt.name());
+					}
+				} else {
+					Log.d(TAG, "Use option from Intent");
+				}
+
+				if ( s != null ) {
+					Log.d(TAG,"setting option as pref " + opt.name() + " = " + s);
 					options.put(opt.name(), s);
 					isPrefSet = true;
 					prefsEditor.putString(opt.name(), s);
@@ -98,11 +126,9 @@ public final class CcndService extends CCNxService {
 				
 			}
 			if (isPrefSet) {
+				Log.d(TAG, "Commit prefs changes");
 				prefsEditor.commit();
 			}
-		} else {
-			// We must load options from prefs
-			options = new HashMap<String, String>((HashMap<String, String>)mCCNxServicePrefs.getAll());
 		}
 
 		Load();	
@@ -181,6 +207,9 @@ public final class CcndService extends CCNxService {
 			CCNxLibraryCheck.checkBCP();	   
 			FileOutputStream stream = new FileOutputStream(try_keystore);
 			BasicKeyManager.createKeyStore(stream, null, null, "ccnd", KEYSTORE_PASS, "CCND");
+			stream.close();
+			stream = new FileOutputStream(new File(dir, ".ccnd_keystore"));
+			BasicKeyManager.createKeyStore(stream, null, "ccndadmin", "Ccndadm1n#".toCharArray(), "ccndadmin"); // XXX Put this password and username into prefs/options
 			stream.close();
 		} catch(RuntimeException rte) {
 			// There are a few which can fail and this makes the service unstable since

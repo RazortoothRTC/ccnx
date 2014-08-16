@@ -12,7 +12,13 @@
  * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
  * Boston, MA 02110-1301, USA.
  */
-
+/*
+ * CCNxTxRxRelay
+ *
+ * Portions Copyright (C) 2014 Razortooth Communications, LLC
+ *
+ */
+ 
 /**
  * JNI wrapper functions for the ccnd process.  This uses android_main.c to
  * procedurally startup ccnd.
@@ -46,17 +52,17 @@
 
 #include "ccnd_private.h"
 
-JNIEXPORT void JNICALL Java_org_ccnx_android_services_ccnd_CcndService_ccndCreate
+JNIEXPORT void JNICALL Java_com_rtc_ccnx_droid_ccnd_CcndService_ccndCreate
 	(JNIEnv *env, jobject thiz);
-JNIEXPORT void JNICALL Java_org_ccnx_android_services_ccnd_CcndService_ccndRun
+JNIEXPORT void JNICALL Java_com_rtc_ccnx_droid_ccnd_CcndService_ccndRun
 	(JNIEnv *env, jobject thiz);
-JNIEXPORT void JNICALL Java_org_ccnx_android_services_ccnd_CcndService_ccndDestroy
+JNIEXPORT void JNICALL Java_com_rtc_ccnx_droid_ccnd_CcndService_ccndDestroy
 	(JNIEnv *env, jobject thiz);
 
-JNIEXPORT void JNICALL Java_org_ccnx_android_services_ccnd_CcndService_setenv
+JNIEXPORT void JNICALL Java_com_rtc_ccnx_droid_ccnd_CcndService_setenv
 	(JNIEnv *env, jobject thiz, jstring jkey, jstring jvalue, jint joverwrite);
 
-JNIEXPORT void JNICALL Java_org_ccnx_android_services_ccnd_CcndService_kill
+JNIEXPORT void JNICALL Java_com_rtc_ccnx_droid_ccnd_CcndService_kill
   (JNIEnv *env, jobject thiz);
 
 extern int start_ccnd();
@@ -74,26 +80,26 @@ androidlogger(void *loggerdata, const char *format, va_list ap)
 JNIEXPORT void JNICALL Java_org_ccnx_android_test_ccnd_CcndThread_launch
   (JNIEnv *env, jobject thiz)
 {
-	Java_org_ccnx_android_services_ccnd_CcndService_ccndCreate(env, thiz);
-	Java_org_ccnx_android_services_ccnd_CcndService_ccndRun(env, thiz);
-	Java_org_ccnx_android_services_ccnd_CcndService_ccndDestroy(env, thiz);
+	Java_com_rtc_ccnx_droid_ccnd_CcndService_ccndCreate(env, thiz);
+	Java_com_rtc_ccnx_droid_ccnd_CcndService_ccndRun(env, thiz);
+	Java_com_rtc_ccnx_droid_ccnd_CcndService_ccndDestroy(env, thiz);
     __android_log_print(ANDROID_LOG_INFO,"CCND", "ccnd launch exiting");
 }
 
 JNIEXPORT void JNICALL Java_org_ccnx_android_test_ccnd_CcndThread_setenv
   (JNIEnv *env, jobject thiz, jstring jkey, jstring jvalue, jint joverwrite) 
 {
-	Java_org_ccnx_android_services_ccnd_CcndService_setenv(env, thiz, jkey, jvalue, joverwrite);
+	Java_com_rtc_ccnx_droid_ccnd_CcndService_setenv(env, thiz, jkey, jvalue, joverwrite);
 }
 
 JNIEXPORT void JNICALL Java_org_ccnx_android_test_ccnd_CcndThread_kill
   (JNIEnv *env, jobject thiz)
 {
-	Java_org_ccnx_android_services_ccnd_CcndService_kill(env, thiz);
+	Java_com_rtc_ccnx_droid_ccnd_CcndService_kill(env, thiz);
 }
 
 
-JNIEXPORT void JNICALL Java_org_ccnx_android_services_ccnd_CcndService_ccndCreate
+JNIEXPORT void JNICALL Java_com_rtc_ccnx_droid_ccnd_CcndService_ccndCreate
   (JNIEnv *env, jobject thiz)
 {
     h = ccnd_create("ccnd", androidlogger, NULL);
@@ -103,7 +109,7 @@ JNIEXPORT void JNICALL Java_org_ccnx_android_services_ccnd_CcndService_ccndCreat
     }
 }
 
-JNIEXPORT void JNICALL Java_org_ccnx_android_services_ccnd_CcndService_ccndRun
+JNIEXPORT void JNICALL Java_com_rtc_ccnx_droid_ccnd_CcndService_ccndRun
   (JNIEnv *env, jobject thiz)
 {
     __android_log_print(ANDROID_LOG_INFO,"CCND", "calling ccnd_run (%p)", h);
@@ -113,14 +119,14 @@ JNIEXPORT void JNICALL Java_org_ccnx_android_services_ccnd_CcndService_ccndRun
     __android_log_print(ANDROID_LOG_INFO,"CCND", "ccnd_run exited");
 }
 
-JNIEXPORT void JNICALL Java_org_ccnx_android_services_ccnd_CcndService_ccndDestroy
+JNIEXPORT void JNICALL Java_com_rtc_ccnx_droid_ccnd_CcndService_ccndDestroy
   (JNIEnv *env, jobject thiz)
 {
     __android_log_print(ANDROID_LOG_INFO,"CCND", "ccnd stopping");
     ccnd_destroy(&h);
 }
 
-JNIEXPORT void JNICALL Java_org_ccnx_android_services_ccnd_CcndService_setenv
+JNIEXPORT void JNICALL Java_com_rtc_ccnx_droid_ccnd_CcndService_setenv
   (JNIEnv *env, jobject thiz, jstring jkey, jstring jvalue, jint joverwrite)
 {
 	const char *key = (*env)->GetStringUTFChars(env, jkey, NULL);
@@ -136,7 +142,7 @@ JNIEXPORT void JNICALL Java_org_ccnx_android_services_ccnd_CcndService_setenv
 	return;
 }
 
-JNIEXPORT void JNICALL Java_org_ccnx_android_services_ccnd_CcndService_kill
+JNIEXPORT void JNICALL Java_com_rtc_ccnx_droid_ccnd_CcndService_kill
   (JNIEnv *env, jobject thiz)
 {
     if( h != NULL ) {

@@ -15,7 +15,7 @@
  * Boston, MA 02110-1301, USA.
  */
 
-package org.ccnx.android.services;
+package com.rtc.ccnx.droid;
 
 import java.util.HashMap;
 
@@ -92,12 +92,14 @@ public abstract class CCNxService extends Service implements Runnable {
 		Log.d(TAG, "Creating");
 
 		// Some emulators have problems with ipv6
+		// XXX Should we deactivate this ... we don't care about emulators
+		// This should be a configuration setting
 		System.setProperty("java.net.preferIPv6Addresses", "false");
 
 		// Init Preferences
 		mCCNxServicePrefs = this.getSharedPreferences("ccnxserviceprefs", MODE_WORLD_READABLE);
 		setStatus(SERVICE_STATUS.SERVICE_SETUP);
-		mNM = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+		mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		showNotification();
 	}
 
