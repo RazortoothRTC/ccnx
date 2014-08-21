@@ -213,11 +213,7 @@ public final class CcndService extends CCNxService {
 											"ccnd", 
 											KEYSTORE_PASS, 
 											"CCND");
-			/* CCNWrappedKeyStore createKeyStore(OutputStream keystoreWriteStream, Key key,
-											 String keyStoreType, String keyAlias,
-											 char [] password,
-											 String userName) throws ConfigurationException, IOException {
-			*/
+
 			stream.close();
 			stream = new FileOutputStream(new File(dir, ".ccnd_keystore"));
 			BasicKeyManager.createKeyStore(stream,
