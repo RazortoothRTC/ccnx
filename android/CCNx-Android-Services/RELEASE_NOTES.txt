@@ -1,6 +1,8 @@
 0.8.0
 =====
 * refs #36 Prepare CCNxTxRxRelay 0.8.0 to publish to Google Play Store
+* refs #35 CCNxTxRxRelay - add support for x86 abi, arm, armv7a, and mips
+* refs #37 Fix CCNxTxRxRelay merge issues between 0.7.2 and 0.8.0
 
 0.7.2
 =====

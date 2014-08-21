@@ -206,10 +206,26 @@ public final class CcndService extends CCNxService {
 			// subsequent attempts to start up this service (manual or via intent), we should
 			CCNxLibraryCheck.checkBCP();	   
 			FileOutputStream stream = new FileOutputStream(try_keystore);
-			BasicKeyManager.createKeyStore(stream, null, null, "ccnd", KEYSTORE_PASS, "CCND");
+			// BasicKeyManager.createKeyStore(OutputStream,Key,String,String,char[],String) is not applicable
+			BasicKeyManager.createKeyStore(stream,
+											null,
+											null,
+											"ccnd", 
+											KEYSTORE_PASS, 
+											"CCND");
+			/* CCNWrappedKeyStore createKeyStore(OutputStream keystoreWriteStream, Key key,
+											 String keyStoreType, String keyAlias,
+											 char [] password,
+											 String userName) throws ConfigurationException, IOException {
+			*/
 			stream.close();
 			stream = new FileOutputStream(new File(dir, ".ccnd_keystore"));
-			BasicKeyManager.createKeyStore(stream, null, "ccndadmin", "Ccndadm1n#".toCharArray(), "ccndadmin"); // XXX Put this password and username into prefs/options
+			BasicKeyManager.createKeyStore(stream,
+											null,
+											null,
+											"ccndadmin",
+											"Ccndadm1n#".toCharArray(),
+											"ccndadmin"); // XXX Put this password and username into prefs/options
 			stream.close();
 		} catch(RuntimeException rte) {
 			// There are a few which can fail and this makes the service unstable since

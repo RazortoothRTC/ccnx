@@ -17,9 +17,10 @@
 APP_PLATFORM := android-5
 
 # Set APP_ABI
-# You should this if you need other arm or x86 or mips ABIs
-# left blank, default is just for armeabi
-# APP_ABI := armeabi armeabi-v7a
+# You should comment this out this out if you only need the default
+# default is just for armeabi
+# Triples build time for JNI code and increases code size for JNI lib by 3x
+APP_ABI := armeabi armeabi-v7a x86
 # For the purposes of most builds it is recommended not to set this unless you
 # intend to target a specific CPU Architecture supported by the Android NDK.
 # Please review ANDROID_NDK docs/CPU-ARCH-ABIS.html for more information.
