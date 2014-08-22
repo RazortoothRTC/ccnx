@@ -7,7 +7,6 @@
 .classpath
 .project
 *~
-*.jar
 *.c.flc
 *.out
 00MANIFEST

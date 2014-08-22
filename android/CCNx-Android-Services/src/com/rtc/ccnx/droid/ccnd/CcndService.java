@@ -92,13 +92,6 @@ public final class CcndService extends CCNxService {
 		options = new HashMap<String, String>((HashMap<String, String>)mCCNxServicePrefs.getAll());
         if (intent != null) {
 			for( CCND_OPTIONS opt : CCND_OPTIONS.values() ) {
-				// XXX I think this breaks any use of prefs
-				/*
-				if(! intent.hasExtra(opt.name())){
-					continue;
-				}
-				*/
-
 				//
 				// If the OPTION isn't in the Intent, Give precedence to
 				// 1. Intent OPTION

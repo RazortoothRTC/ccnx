@@ -15,7 +15,7 @@
  * Boston, MA 02110-1301, USA.
  */
 /*
- * CCNxTxRxRelay
+ * CCNx TxRxRelay
  *
  * Portions Copyright (C) 2014 Razortooth Communications, LLC
  *
@@ -77,6 +77,9 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.io.InputStream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Android UI for controlling CCNx services.
@@ -157,6 +160,12 @@ public final class Controller extends Activity implements OnClickListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // SLF4J, this is just a shim for now, we will integrate further in
+        // subsequent releases
+    	Logger log = LoggerFactory.getLogger(Controller.class);
+    	log.debug("Creating Service Controller");
+
         setContentView(R.layout.controllermain);   
         
         Log.d(TAG,"Creating Service Controller");
