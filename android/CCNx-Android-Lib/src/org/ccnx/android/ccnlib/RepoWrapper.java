@@ -49,6 +49,7 @@ public final class RepoWrapper extends CCNxWrapper {
 		CCNR_MIN_SEND_BUFSIZE,
 		CCNR_PROTO,
 		CCNR_LISTEN_ON,
+		CCNR_START_WRITE_SCOPE_LIMIT,
 		CCNR_STATUS_PORT
 	}
 	
