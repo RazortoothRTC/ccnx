@@ -3,6 +3,10 @@
 * refs #36 Prepare CCNxTxRxRelay 0.8.0 to publish to Google Play Store
 * refs #35 CCNxTxRxRelay - add support for x86 abi, arm, armv7a, and mips
 * refs #37 Fix CCNxTxRxRelay merge issues between 0.7.2 and 0.8.0
+* refs #21 CCNx Android Services requires external BCP jar to be downloaded
+* refs #40 CCNxTxRxRelay fix broken libs clean
+* refs #10 CCNx Android Services should implement enterprise logging
+* refs #32 Add a default privacy policy for CCNxTxRxRelay
 
 0.7.2
 =====
