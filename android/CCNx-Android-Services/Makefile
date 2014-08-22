@@ -42,7 +42,7 @@ $(TARGET): $(JARS) ccnd local.properties project.properties build.xml
 	ant debug
 
 local.properties project.properties:
-	@mkdir -p libs
+#	@mkdir -p libs
 	$(ANDROID_SDK)/tools/android update project --name CCNx-Android-Services -p . -t android-15 --library ../CCNx-Android-Lib/
 
 # Need to revisit this for newer NDK.
@@ -61,7 +61,7 @@ checkccnxdeps:
 
 ccnd: environment checkccnxdeps
 	@echo "Building CCND"
-	mkdir -p libs
+#	mkdir -p libs
 	if test -n "$$APP_ABI"; then \
 			$(ANDROID_NDK)/ndk-build APP_ABI="$$APP_ABI" ; \
 	else \
@@ -99,7 +99,7 @@ clean: simpleclean objclean
 # But does remove project OBJ files 
 simpleclean:
 	rm -rf $(BIN) $(GEN)
-	rm -rf libs/*
+	rm -rf libs/arm* libs/x86
 	rm -f project.properties
 	rm -f local.properties
 

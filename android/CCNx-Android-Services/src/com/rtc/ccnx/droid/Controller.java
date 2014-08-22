@@ -225,6 +225,7 @@ public final class Controller extends Activity implements OnClickListener {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 	    // Handle item selection
+	    Intent intent;
 	    switch (item.getItemId()) {
 	        case R.id.reset:
 	        	// Need to figure out if this is always safe to call even when nothing is running
@@ -234,7 +235,11 @@ public final class Controller extends Activity implements OnClickListener {
 	            	", repo: " + control.getRepoStatus().name() + "}", 10).show();
 	            return true;
 	        case R.id.ccndstatus:
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(CCNX_WS_URL));
+                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(CCNX_WS_URL));
+                startActivity(intent);
+	            return true;
+	        case R.id.privacy:
+                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.url_privacy_policy)));
                 startActivity(intent);
 	            return true;
 	        case R.id.about:

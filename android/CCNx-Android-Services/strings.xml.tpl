@@ -31,6 +31,8 @@
     <string name="label_ok">OK</string>
     <string name="label_ccndstatus">CCND Status</string>
     <string name="service_started1_msg">CCNx Service Control started</string>
+    <string name="label_privacy">Privacy Policy</string>
+    <string name="url_privacy_policy">http://razortooth.biz/privacy-policy-ccnx-txrxrelay.html</string>
     <string name="about_text">CCNx PROJECT_NUMBER\n
 /*
  * CCNxTxRxRelay

@@ -6,4 +6,6 @@
         android:title="@string/label_about" />
     <item android:id="@+id/ccndstatus"
         android:title="@string/label_ccndstatus" />
+    <item android:id="@+id/privacy"
+        android:title="@string/label_privacy" />
 </menu>
