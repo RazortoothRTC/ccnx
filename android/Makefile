@@ -18,7 +18,7 @@ SUBDIRS = external CCNx-Android-Lib CCNx-Android-Services apps
 
 .PHONY: subdirs $(SUBDIRS_clean) $(SUBDIRS) $(SUBDIRS_distclean) _always
 
-default all: verifykits $(SUBDIRS)
+default all: $(SUBDIRS)
 
 
 # 
